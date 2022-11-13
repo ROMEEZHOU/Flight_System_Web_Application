@@ -5,31 +5,88 @@
 
 </head>
 
+<style type="text/css">
+	.navigation {
+  		display: flex;
+  		flex-flow: row wrap;
+  		justify-content: flex-end;
+  
+  		list-style: none;
+  		margin: 0; 
+  		background: #6598d3;
+	}
+
+	.navigation a {
+  		text-decoration: none;
+  		display: block;
+  		padding: 1em;
+  		color: white;
+	}
+
+	.navigation a:hover {
+  		background: #1565C0;
+	}
+	
+	h1 {
+        color: #1565C0;
+        font-family: arial;
+    }
+
+	#post_button {
+        float: left;
+        background-color: #1565C0;
+        border: none;
+        color: white;
+        padding: 4px;
+        font-size: 14px;
+        border-radius: 2px;
+	}
+
+</style>
+
 <body>
-	<a href="/login">Login</a>
-	<a href="/register">Register</a>
+	<div>
+		<ul class="navigation">
+			<li><a href="#">Log in </a></li>
+			<li><a href="#">Register</a></li>
+		</ul>
+	</div>
 
-	<form action="/SearchFlight1" method="POST">
-		<input type="text" name = "airline" placeholder="airline" required/> </br>
-		<input type="submit" value = Search />
-	</form>
+	<h1>Welcome to Romee's Flight Booking System！</h1>
 
-	<style type="text/css">
-		table, th, td{
-			border: 1px solid black;
-		}
-	</style>
+	<div style="min-height: 70px; flex: 1;">
+		<form action="/SearchFlight1" method="POST">
+			<div style="display: table;">
+				<div style="display: table-cell;">
+					<input type="text" name = "airline" placeholder="airline" required/> </br>
+				</div>
+				<div style="display: table-cell;">
+					<input type="text" name = "dept_airport" placeholder="departure airport" required/> </br>
+				</div>
+			</div>
+			<input id="post_button" type="submit" value="Search Flight" />
+		</form>
+	</div>
+
+	<div>
+		<style type="text/css">
+			table, th, td{
+				border: 1px solid black;
+			}
+		</style>
+		
+		<table>
+			<th>Flight Number</th>
+		
+		{% for line in posts %}
+			<tr>
+				<td>{{line['flight_num']}}</td>
+			</tr>
+		{% endfor %}
+		</table>
 	
-	<table>
-		<th>Flight Number</th>
+	</div>
 	
-	{% for line in posts %}
-		<tr>
-			<td>{{line['flight_num']}}</td>
-		</tr>
-	{% endfor %}
-	</table>
-
 </body>
 
 </html>
