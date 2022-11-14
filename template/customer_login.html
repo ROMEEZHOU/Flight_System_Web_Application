@@ -1,0 +1,63 @@
+<html>
+<head>
+</head>
+
+<style>
+    .parent {
+        border: 6px solid #1565C0;
+        margin: 1rem;
+        padding: 2rem 2rem;
+        text-align: center;
+    }
+    .child {
+        display: inline-block;
+        padding: 1rem 1rem;
+        vertical-align: middle;
+    }
+
+    #post_button {
+        float: center;
+        width: 200px;
+        margin-top: 20px;
+        background-color: #1565C0;
+        border: none;
+        color: white;
+        padding: 4px;
+        font-size: 14px;
+        border-radius: 2px;
+	}
+
+    #post_bar {
+        width:200px;
+        margin-top: 20px;
+        background-color: white;
+        padding: 10px;
+    }
+
+    a {
+  		text-decoration: none;
+        background-color: #6598d3;
+  		display: block;
+  		padding: 1em;
+  		color: white;
+	}
+
+	a:hover {
+  		background: #1565C0;
+	}
+</style>
+<body>
+<div class="parent";>
+    <form action="/CustomerLoginAuth" method="POST">
+        <input id="post_bar" type="text" name = "email" placeholder="email" required/> </br>
+        <input id="post_bar" type="password" name = "password" placeholder="password" required/></br>
+        <input id="post_button" type="submit" value= Login />
+        {% if error %}
+            <p class="error"><strong>Error:</strong> {{error}}</p>
+        {% endif %}
+    </form>
+</div>
+
+<a href="/login">Go back</a>
+
+</body>

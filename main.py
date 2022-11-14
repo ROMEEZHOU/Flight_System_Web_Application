@@ -33,7 +33,7 @@ def SearchFlight1():
 
 
 
-"""
+
 #Define route for login
 @app.route('/login')
 def login():
@@ -43,7 +43,23 @@ def login():
 @app.route('/register')
 def register():
 	return render_template('register.html')
-"""
+
+@app.route('/CustomerLogin')
+def customer_login():
+    return render_template('customer_login.html')
+
+@app.route('/StaffLogin')
+def staff_login():
+    return render_template('staff_login.html')
+
+@app.route('/CustomerRegister')
+def customer_register():
+    return render_template('customer_register.html')
+
+@app.route('/StaffRegister')
+def staff_register():
+    return render_template('staff_register.html')
+
 
 if __name__ == "__main__":
 	app.run('127.0.0.1', 5000, debug=True)
