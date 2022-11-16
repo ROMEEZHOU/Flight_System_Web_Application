@@ -49,18 +49,18 @@
 <body>
 <div class="parent";>
     <form action="/CustomerRegisterAuth" method="POST">
-        <input id="post_bar" type="text" name = "email" placeholder="email" required/> </br>
-        <input id="post_bar" type="password" name = "name" placeholder="name" required/></br>
-        <input id="post_bar" type="text" name = "password" placeholder="password" required/> </br>
-        <input id="post_bar" type="text" name = "building_number" placeholder="building number" required/> </br>
-        <input id="post_bar" type="text" name = "street" placeholder="street" required/> </br>
-        <input id="post_bar" type="text" name = "city" placeholder="city" required/> </br>
-        <input id="post_bar" type="text" name = "state" placeholder="state" required/> </br>
-        <input id="post_bar" type="text" name = "phone_number" placeholder="phone number" required/> </br>
-        <input id="post_bar" type="text" name = "passport_number" placeholder="passport number" required/> </br>
-        <input id="post_bar" type="date" name = "passport_expiration" placeholder="passport_expiration" required/> </br>
-        <input id="post_bar" type="text" name = "passport_country" placeholder="passport country" required/> </br>
-        <input id="post_bar" type="date" name = "date_of_birth" placeholder="date_of_birth" required/> </br>
+        Email: <input id="post_bar" type="text" name = "email" placeholder="email" required/> </br>
+        Name: <input id="post_bar" type="text" name = "name" placeholder="name" required/></br>
+        Password: <input id="post_bar" type="password" name = "password" placeholder="password" required/> </br>
+        Building Number: <input id="post_bar" type="number" min="1" name = "building_number" placeholder="building number" required/> </br>
+        Street: <input id="post_bar" type="text" name = "street" placeholder="street" required/> </br>
+        City: <input id="post_bar" type="text" name = "city" placeholder="city" required/> </br>
+        State: <input id="post_bar" type="text" name = "state" placeholder="state" required/> </br>
+        Phone Number: <input id="post_bar" type="text" name = "phone_number" placeholder="phone number" required/> </br>
+        Passport Number: <input id="post_bar" type="text" name = "passport_number" placeholder="passport number" required/> </br>
+        Passport Expiration Date: <input id="post_bar" type="date" name = "passport_expiration" placeholder="passport expiration" required/> </br>
+        Passport Country: <input id="post_bar" type="text" name = "passport_country" placeholder="passport country" required/> </br>
+        Date of Birth: <input id="post_bar" type="date" name = "date_of_birth" placeholder="date of birth" required/> </br>
         <input id="post_button" type="submit" value= Register />
         {% if error %}
             <p class="error"><strong>Error:</strong> {{error}}</p>
