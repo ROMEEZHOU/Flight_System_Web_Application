@@ -191,7 +191,57 @@ def customer_register_auth():
 
 @app.route('/StaffRegisterAuth',methods=['GET', 'POST'])
 def staff_register_auth():
-    pass
+    #grabs information from the forms
+    username=request.form['username']
+    user_password = request.form['user_password']
+    first_name=request.form['first_name']
+    last_name=request.form['last_name']
+    date_of_birth=request.form['date_of_birth']
+    airline=request.form['airline']
+    phone_num=request.form['phone_num']
+    email=request.form['email']
+
+    phone_list=phone_num.split(',')
+    email_list=email.split(',')
+
+
+	#cursor used to send queries
+    cursor = conn.cursor()
+	#executes query
+    query1 = 'SELECT * FROM airline_staff WHERE username = %s'
+    cursor.execute(query1, (username))
+	#stores the results in a variable
+    data1 = cursor.fetchone()
+	#use fetchall() if you are expecting more than 1 data row
+    error = None
+
+    query2='SELECT * FROM airline WHERE name = %s'
+    cursor.execute(query1, (airline))
+    data2 = cursor.fetchone()
+    if not data2:
+        error = 'This airline does not exist'
+        return render_template('staff_register.html', error = error)
+
+    if(data1):
+		#If the previous query returns data, then user exists
+        error = "This username is been already existed"
+        return render_template('staff_register.html', error = error)
+
+        
+    else:
+        ins = 'INSERT INTO airline_staff VALUES(%s, %s, %s, %s , %s, %s)'
+        cursor.execute(ins, (username, user_password, first_name, last_name, date_of_birth, airline))
+        for phone_n in phone_list:
+            ins_phone = 'INSERT INTO staff_phone VALUES(%s, %s)'
+            cursor.execute(ins,(username,phone_n))
+
+        for e in email_list:
+            ins_email='INSERT INTO staff_email VALUES(%s, %s)'
+            cursor.execute(ins,(username,e))
+
+        conn.commit()
+        cursor.close()
+        return render_template('login.html')
 
 if __name__ == "__main__":
 	app.run('127.0.0.1', 5000, debug=True)

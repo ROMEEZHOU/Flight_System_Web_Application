@@ -49,18 +49,14 @@
 <body>
 <div class="parent";>
     <form action="/StaffRegisterAuth" method="POST">
-        <input id="post_bar" type="text" name = "email" placeholder="email" required/> </br>
-        <input id="post_bar" type="password" name = "name" placeholder="name" required/></br>
-        <input id="post_bar" type="text" name = "password" placeholder="password" required/> </br>
-        <input id="post_bar" type="text" name = "building_number" placeholder="building number" required/> </br>
-        <input id="post_bar" type="text" name = "street" placeholder="street" required/> </br>
-        <input id="post_bar" type="text" name = "city" placeholder="city" required/> </br>
-        <input id="post_bar" type="text" name = "state" placeholder="state" required/> </br>
-        <input id="post_bar" type="text" name = "phone_number" placeholder="phone number" required/> </br>
-        <input id="post_bar" type="text" name = "passport_number" placeholder="passport number" required/> </br>
-        <input id="post_bar" type="date" name = "passport_expiration" placeholder="passport_expiration" required/> </br>
-        <input id="post_bar" type="text" name = "passport_country" placeholder="passport country" required/> </br>
-        <input id="post_bar" type="date" name = "date_of_birth" placeholder="date_of_birth" required/> </br>
+        Username: <input id="post_bar" type="text" name = "username" placeholder="username" required/> </br>
+        Password: <input id="post_bar" type="password" name = "user_password" placeholder="password" required/></br>
+        First Name: <input id="post_bar" type="text" name = "first_name" placeholder="first name" required/> </br>
+        Last Name: <input id="post_bar" type="text" name = "last_name" placeholder="last name" required/> </br>
+        Date of Birth: <input id="post_bar" type="date" name = "date_of_birth" placeholder="date_of_birth" required/> </br>
+        Airline: <input id="post_bar" type="text" name = "airline" placeholder="airline" required/> </br>
+        Phone: (seperated by comma) <input id="post_bar" type="text" name = "phone_num" placeholder="phone number" required/> </br>
+        Email: (seperated by comma)<input id="post_bar" type="text" name = "email" placeholder="email" required/> </br>
         <input id="post_button" type="submit" value= Register />
         {% if error %}
             <p class="error"><strong>Error:</strong> {{error}}</p>
