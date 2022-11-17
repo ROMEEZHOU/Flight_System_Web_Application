@@ -31,6 +31,10 @@ def SearchFlight1():
 
     return render_template('index.html',posts=data1)
 
+@app.route('/SearchFlightStatus',methods=['GET','POST'])
+def search_flight_status():
+    pass
+
 
 
 
