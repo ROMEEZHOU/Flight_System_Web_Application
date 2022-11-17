@@ -23,14 +23,33 @@ def SearchFlight1():
     departure = request.form['departure']
     destination=request.form['destination']
     dept_date=request.form['dept_date']
-    
-    if 'rounde_trip' in request.form:
-        if 'return_date' in request.form:
-            return_date=request.form['return_date'] 
+    return_date=request.form['return_date']
+    if 'round_trip' in request.form:
+        if return_date!='':
             cursor=conn.cursor()
-            query='SELECT * FROM '
+            query1='(SELECT * FROM flight WHERE dept_airport= %s AND arr_airport= %s AND dept_date = %s) UNION (SELECT * FROM flight WHERE dept_airport= %s AND dept_date= %s AND arr_airport IN (SELECT name FROM airport WHERE city= %s)) UNION (SELECT * FROM flight WHERE arr_airport= %s AND dept_date= %s AND dept_airport IN (SELECT name FROM airport WHERE city= %s)) UNION (SELECT * FROM flight WHERE dept_date= %s AND dept_airport IN (SELECT name FROM airport WHERE city= %s) AND arr_airport IN (SELECT name FROM airport WHERE city = %s))'
+            cursor.execute(query1, (departure, destination, dept_date, departure, dept_date, destination, destination, dept_date, departure, dept_date, departure, destination))
+            data1=cursor.fetchall()
+
+            query2='(SELECT * FROM flight WHERE dept_airport= %s AND arr_airport= %s AND dept_date = %s) UNION (SELECT * FROM flight WHERE dept_airport= %s AND dept_date= %s AND arr_airport IN (SELECT name FROM airport WHERE city= %s)) UNION (SELECT * FROM flight WHERE arr_airport= %s AND dept_date= %s AND dept_airport IN (SELECT name FROM airport WHERE city= %s)) UNION (SELECT * FROM flight WHERE dept_date= %s AND dept_airport IN (SELECT name FROM airport WHERE city= %s) AND arr_airport IN (SELECT name FROM airport WHERE city = %s))'
+            cursor.execute(query1, (destination, departure, return_date, destination, return_date, departure, departure, return_date, destination, return_date, destination, departure))
+            data2=cursor.fetchall()
+            cursor.close()
+
+            return render_template('index.html',post1=data1,post2=data2)
+
         else:
             return render_template('index.html',error='Please select the return date')
+
+    else:
+        cursor=conn.cursor()
+        query='(SELECT * FROM flight WHERE dept_airport= %s AND arr_airport= %s AND dept_date = %s) UNION (SELECT * FROM flight WHERE dept_airport= %s AND dept_date= %s AND arr_airport IN (SELECT name FROM airport WHERE city= %s)) UNION (SELECT * FROM flight WHERE arr_airport= %s AND dept_date= %s AND dept_airport IN (SELECT name FROM airport WHERE city= %s)) UNION (SELECT * FROM flight WHERE dept_date= %s AND dept_airport IN (SELECT name FROM airport WHERE city= %s) AND arr_airport IN (SELECT name FROM airport WHERE city = %s))'
+        cursor.execute(query, (departure, destination, dept_date, departure, dept_date, destination, destination, dept_date, departure, dept_date, departure, destination))
+        data=cursor.fetchall()
+        cursor.close()
+        return render_template('index.html',post1=data)
+
+    '''
     cursor=conn.cursor()
     query = 'SELECT flight_num FROM flight WHERE airline_name = %s'
     cursor.execute(query, (airline))
@@ -39,7 +58,7 @@ def SearchFlight1():
         print(each['flight_num'])
     cursor.close()
 
-    return render_template('index.html',posts=data1)
+    return render_template('index.html',post1=data1)'''
 
 @app.route('/SearchFlightStatus',methods=['GET','POST'])
 def search_flight_status():
