@@ -73,7 +73,7 @@
 				&nbsp;
 				&nbsp;
 				<div style="display: table-cell;">
-					Return Date: <input type="date" name = "return_date" placeholder="return_date" required/> </br>
+					Return Date: <input type="date" name = "return_date" placeholder="return_date"/> </br>
 				</div>
 				&nbsp;
 				&nbsp;
@@ -82,6 +82,9 @@
 				</div>
 			</div>
 			<input id="post_button" type="submit" value="Search Flight" />
+			{% if error %}
+            	<p class="error"><strong>Error:</strong> {{error}}</p>
+        	{% endif %}
 			
 		</form>
 	</div>

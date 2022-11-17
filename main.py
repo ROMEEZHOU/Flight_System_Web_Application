@@ -20,7 +20,17 @@ def hello():
 
 @app.route('/SearchFlight1',methods=['GET', 'POST'])
 def SearchFlight1():
-    airline = request.form['airline']
+    departure = request.form['departure']
+    destination=request.form['destination']
+    dept_date=request.form['dept_date']
+    
+    if 'rounde_trip' in request.form:
+        if 'return_date' in request.form:
+            return_date=request.form['return_date'] 
+            cursor=conn.cursor()
+            query='SELECT * FROM '
+        else:
+            return render_template('index.html',error='Please select the return date')
     cursor=conn.cursor()
     query = 'SELECT flight_num FROM flight WHERE airline_name = %s'
     cursor.execute(query, (airline))
