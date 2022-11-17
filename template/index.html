@@ -158,6 +158,7 @@
 		</form>
 	</div>
 
+	{% if post1 %}
 	<div>
 		<h2>Departure Flight</h2>
 		<table class=table11_7>
@@ -189,6 +190,11 @@
 			</tr>
 		{% endfor %}
 		</table>
+	</div>
+	{% endif %}
+
+	{% if post2 %}
+	<div>
 		<h2>Return Flight</h2>
 		<table class=table11_7>
 			<th>Airline</th>
@@ -219,8 +225,8 @@
 			</tr>
 		{% endfor %}
 		</table>
-	
 	</div>
+	{% endif %}
 	
 </body>
 
