@@ -60,9 +60,40 @@ def SearchFlight1():
 
     return render_template('index.html',post1=data1)'''
 
+
 @app.route('/SearchFlightStatus',methods=['GET','POST'])
 def search_flight_status():
-    pass
+    airline= request.form['airline']
+    flight_num=request.form['flight_num']
+    dept_date=request.form['dept_date']
+    arr_date=request.form['arr_date']
+
+    if dept_date=='':
+        if arr_date=='':
+            return render_template('index.html',error='Please enter either departure date or arrival date')
+        else:
+            cursor=conn.cursor()
+            query='SELECT * FROM flight WHERE airline_name= %s AND flight_num = %s AND arr_date= %s'
+            cursor.execute(query, (airline, flight_num, arr_date))
+            data=cursor.fetchall()
+            cursor.close()
+            return render_template('index.html',post3=data)
+    else:
+        if arr_date=='':
+            cursor=conn.cursor()
+            query='SELECT * FROM flight WHERE airline_name= %s AND flight_num = %s AND dept_date= %s'
+            cursor.execute(query, (airline, flight_num, dept_date))
+            data=cursor.fetchall()
+            cursor.close()
+            return render_template('index.html',post3=data)
+
+        else:
+            cursor=conn.cursor()
+            query='SELECT * FROM flight WHERE airline_name= %s AND flight_num = %s AND dept_date= %s AND arr_date = %s'
+            cursor.execute(query, (airline, flight_num, dept_date, arr_date))
+            data=cursor.fetchall()
+            cursor.close()
+            return render_template('index.html',post3=data)
 
 
 

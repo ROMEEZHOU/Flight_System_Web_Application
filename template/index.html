@@ -140,20 +140,18 @@
 				&nbsp;
 				&nbsp;
 				<div style="display: table-cell;">
-					Departure Date: <input type="date" name = "dept_date" placeholder="dept_date" required/> </br>
+					Departure Date: <input type="date" name = "dept_date" placeholder="dept_date"/> </br>
 				</div>
 				&nbsp;
 				&nbsp;
 				<div style="display: table-cell;">
-					Arrival Date: <input type="date" name = "arr_date" placeholder="arr_date" required/> </br>
-				</div>
-				&nbsp;
-				&nbsp;
-				<div style="display: table-cell;">
-					Round Trip: <input type="checkbox" name = "round_trip" placeholder="round trip"/> </br>
+					Arrival Date: <input type="date" name = "arr_date" placeholder="arr_date"/> </br>
 				</div>
 			</div>
 			<input id="post_button" type="submit" value="Search Flight Status" />
+			{% if error %}
+            	<p class="error"><strong>Error:</strong> {{error}}</p>
+        	{% endif %}
 			
 		</form>
 	</div>
@@ -227,7 +225,42 @@
 		</table>
 	</div>
 	{% endif %}
-	
+
+	{% if post3 %}
+	<div>
+		<h2>Flight Status</h2>
+		<table class=table11_7>
+			<th>Airline</th>
+			<th>Flight Number</th>
+			<th>Departure Date</th>
+			<th>Departure Time</th>
+			<th>Arrival Date</th>
+			<th>Arrivel Time</th>
+			<th>From</th>
+			<th>To</th>
+			<th>Price(B)</th>
+			<th>Status</th>
+			<th>Airplane</th>
+		
+		{% for line in post3 %}
+			<tr>
+				<td>{{line['airline_name']}}</td>
+				<td>{{line['flight_num']}}</td>
+				<td>{{line['dept_date']}}</td>
+				<td>{{line['dept_time']}}</td>
+				<td>{{line['arr_date']}}</td>
+				<td>{{line['arr_time']}}</td>
+				<td>{{line['dept_airport']}}</td>
+				<td>{{line['arr_airport']}}</td>
+				<td>{{line['base_price']}}</td>
+				<td>{{line['flight_status']}}</td>
+				<td>{{line['id_num']}}</td>
+			</tr>
+		{% endfor %}
+		</table>
+	</div>
+	{% endif %}
+
 </body>
 
 </html>
