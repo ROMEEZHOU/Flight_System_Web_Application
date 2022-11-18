@@ -108,7 +108,7 @@ def search_flight_status():
 #Define route for login
 @app.route('/login')
 def login():
-	return render_template('login.html')
+    return render_template('login.html')
 
 #Define route for register
 @app.route('/register')
@@ -155,17 +155,17 @@ def customer_register_auth():
         error = "Building number must be an integer"
         return render_template('customer_register.html', error = error)
 
-	#cursor used to send queries
+    #cursor used to send queries
     cursor = conn.cursor()
-	#executes query
+    #executes query
     query = 'SELECT * FROM customer WHERE email = %s'
     cursor.execute(query, (email))
-	#stores the results in a variable
+    #stores the results in a variable
     data = cursor.fetchone()
-	#use fetchall() if you are expecting more than 1 data row
+    #use fetchall() if you are expecting more than 1 data row
     error = None
     if(data):
-		#If the previous query returns data, then user exists
+    	#If the previous query returns data, then user exists
         error = "This email is been used"
         return render_template('customer_register.html', error = error)
     if not isinstance(building_number, int):
@@ -195,14 +195,14 @@ def staff_register_auth():
     email_list=email.split(',')
 
 
-	#cursor used to send queries
+    #cursor used to send queries
     cursor = conn.cursor()
-	#executes query
+    #executes query
     query1 = 'SELECT * FROM airline_staff WHERE username = %s'
     cursor.execute(query1, (username))
-	#stores the results in a variable
+    #stores the results in a variable
     data1 = cursor.fetchone()
-	#use fetchall() if you are expecting more than 1 data row
+    #use fetchall() if you are expecting more than 1 data row
     error = None
 
     query2='SELECT * FROM airline WHERE name = %s'
@@ -213,7 +213,7 @@ def staff_register_auth():
         return render_template('staff_register.html', error = error)
 
     if(data1):
-		#If the previous query returns data, then user exists
+    	#If the previous query returns data, then user exists
         error = "This username is been already existed"
         return render_template('staff_register.html', error = error)
 
@@ -236,56 +236,56 @@ def staff_register_auth():
 @app.route('/CustomerLoginAuth',methods=['GET', 'POST'])
 def customer_login_auth():
     #grabs information from the forms
-	email = request.form['email']
-	password = request.form['password']
+    email = request.form['email']
+    password = request.form['password']
 
     #cursor used to send queries
-	cursor = conn.cursor()
+    cursor = conn.cursor()
 
-	#executes query
-	query = 'SELECT name FROM customer WHERE email = %s and customer_password = MD5(%s)'
-	cursor.execute(query, (email, password))
-	#stores the results in a variable
-	data = cursor.fetchone()
-	#use fetchall() if you are expecting more than 1 data row
-	cursor.close()
-	error = None
-	if data:
+    #executes query
+    query = 'SELECT name FROM customer WHERE email = %s and customer_password = %s'
+    cursor.execute(query, (email, password))
+    #stores the results in a variable
+    data = cursor.fetchone()
+    #use fetchall() if you are expecting more than 1 data row
+    cursor.close()
+    error = None
+    if data:
         session['type']='customer'
         session['username'] = data['name']
         return redirect(url_for('customer_home'))
-	else:
-		#returns an error message to the html page
-		error = 'Invalid login or username'
-		return render_template('customer_login.html', error=error)
+    else:
+    	#returns an error message to the html page
+    	error = 'Invalid login or username'
+    	return render_template('customer_login.html', error=error)
 
 @app.route('/StaffLoginAuth',methods=['GET', 'POST'])
 def staff_login_auth():
     #grabs information from the forms
-	username = request.form['username']
-	user_password = request.form['password']
+    username = request.form['username']
+    user_password = request.form['password']
 
     #cursor used to send queries
-	cursor = conn.cursor()
+    cursor = conn.cursor()
 
-	#executes query
-	query = 'SELECT * FROM airline_staff WHERE username = %s and user_password = MD5(%s)'
-	cursor.execute(query, (username, user_password))
-	#stores the results in a variable
-	data = cursor.fetchone()
-	#use fetchall() if you are expecting more than 1 data row
-	cursor.close()
-	error = None
-	if(data):
-		#creates a session for the the user
-		#session is a built in
+    #executes query
+    query = 'SELECT * FROM airline_staff WHERE username = %s and user_password = %s'
+    cursor.execute(query, (username, user_password))
+    #stores the results in a variable
+    data = cursor.fetchone()
+    #use fetchall() if you are expecting more than 1 data row
+    cursor.close()
+    error = None
+    if(data):
+        #creates a session for the the user
+        #session is a built in
         session['type'] = 'staff'
         session['username'] = username
         return redirect(url_for('staff_home'))
-	else:
-		#returns an error message to the html page
-		error = 'Invalid login or username'
-		return render_template('staff_login.html', error=error)
+    else:
+        #returns an error message to the html page
+        error = 'Invalid login or username'
+        return render_template('staff_login.html', error=error)
 
 
 ###############################################################################
@@ -308,16 +308,10 @@ def customer_home():
 
 @app.route('/staff_home',methods=['GET', 'POST'])
 def staff_home():
-    
+    if session.get('type')!='staff' or not session.get('username'):
+        return redirect('/')
     username = session['username']
-    cursor = conn.cursor();
-    query = 'SELECT ts, blog_post FROM blog WHERE username = %s ORDER BY ts DESC'
-    cursor.execute(query, (username))
-    data1 = cursor.fetchall() 
-    for each in data1:
-        print(each['blog_post'])
-    cursor.close()
-    return render_template('staff_home.html', username=username, posts=data1)\
+    return render_template('staff_home.html', username=username)
 
 
 ###############################################################################
@@ -328,7 +322,9 @@ def staff_home():
 def log_out():
     session['type']=None
     session['username']=None
-    return render_template('/')
+    return redirect('/')
 
+
+app.secret_key = 'Flight System Romee'
 if __name__ == "__main__":
-	app.run('127.0.0.1', 5000, debug=True)
+    app.run('127.0.0.1', 5000, debug=True)
