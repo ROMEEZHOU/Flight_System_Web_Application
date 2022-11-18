@@ -14,6 +14,10 @@ conn = pymysql.connect(host='localhost',
                        charset='utf8mb4',
                        cursorclass=pymysql.cursors.DictCursor)
 
+###############################################################################
+###############################################################################
+########################## Main Home Page #####################################
+
 @app.route('/')
 def hello():
     return render_template('index.html',posts='')
@@ -96,6 +100,9 @@ def search_flight_status():
             return render_template('index.html',post3=data)
 
 
+###############################################################################
+###############################################################################
+########################## Login And Register #################################
 
 
 #Define route for login
@@ -123,87 +130,6 @@ def customer_register():
 @app.route('/StaffRegister')
 def staff_register():
     return render_template('staff_register.html')
-
-@app.route('/CustomerLoginAuth',methods=['GET', 'POST'])
-def customer_login_auth():
-    #grabs information from the forms
-	email = request.form['email']
-	password = request.form['password']
-
-    #cursor used to send queries
-	cursor = conn.cursor()
-
-	#executes query
-	query = 'SELECT * FROM customer WHERE email = %s and customer_password = MD5(%s)'
-	cursor.execute(query, (email, password))
-	#stores the results in a variable
-	data = cursor.fetchone()
-	#use fetchall() if you are expecting more than 1 data row
-	cursor.close()
-	error = None
-	if(data):
-		#creates a session for the the user
-		#session is a built in
-		session['username'] = email
-		return redirect(url_for('customer_home'))
-	else:
-		#returns an error message to the html page
-		error = 'Invalid login or username'
-		return render_template('customer_login.html', error=error)
-
-@app.route('/StaffLoginAuth',methods=['GET', 'POST'])
-def staff_login_auth():
-    #grabs information from the forms
-	username = request.form['username']
-	user_password = request.form['password']
-
-    #cursor used to send queries
-	cursor = conn.cursor()
-
-	#executes query
-	query = 'SELECT * FROM airline_staff WHERE username = %s and user_password = MD5(%s)'
-	cursor.execute(query, (username, user_password))
-	#stores the results in a variable
-	data = cursor.fetchone()
-	#use fetchall() if you are expecting more than 1 data row
-	cursor.close()
-	error = None
-	if(data):
-		#creates a session for the the user
-		#session is a built in
-		session['username'] = username
-		return redirect(url_for('staff_home'))
-	else:
-		#returns an error message to the html page
-		error = 'Invalid login or username'
-		return render_template('staff_login.html', error=error)
-
-
-@app.route('/customer_home',methods=['GET', 'POST'])
-def customer_home():
-    
-    username = session['username']
-    cursor = conn.cursor();
-    query = 'SELECT ts, blog_post FROM blog WHERE username = %s ORDER BY ts DESC'
-    cursor.execute(query, (username))
-    data1 = cursor.fetchall() 
-    for each in data1:
-        print(each['blog_post'])
-    cursor.close()
-    return render_template('customer_home.html', username=username, posts=data1)
-
-@app.route('/staff_home',methods=['GET', 'POST'])
-def staff_home():
-    
-    username = session['username']
-    cursor = conn.cursor();
-    query = 'SELECT ts, blog_post FROM blog WHERE username = %s ORDER BY ts DESC'
-    cursor.execute(query, (username))
-    data1 = cursor.fetchall() 
-    for each in data1:
-        print(each['blog_post'])
-    cursor.close()
-    return render_template('staff_home.html', username=username, posts=data1)
 
 
 @app.route('/CustomerRegisterAuth',methods=['GET', 'POST'])
@@ -306,6 +232,103 @@ def staff_register_auth():
         conn.commit()
         cursor.close()
         return render_template('login.html')
+
+@app.route('/CustomerLoginAuth',methods=['GET', 'POST'])
+def customer_login_auth():
+    #grabs information from the forms
+	email = request.form['email']
+	password = request.form['password']
+
+    #cursor used to send queries
+	cursor = conn.cursor()
+
+	#executes query
+	query = 'SELECT name FROM customer WHERE email = %s and customer_password = MD5(%s)'
+	cursor.execute(query, (email, password))
+	#stores the results in a variable
+	data = cursor.fetchone()
+	#use fetchall() if you are expecting more than 1 data row
+	cursor.close()
+	error = None
+	if data:
+        session['type']='customer'
+        session['username'] = data['name']
+        return redirect(url_for('customer_home'))
+	else:
+		#returns an error message to the html page
+		error = 'Invalid login or username'
+		return render_template('customer_login.html', error=error)
+
+@app.route('/StaffLoginAuth',methods=['GET', 'POST'])
+def staff_login_auth():
+    #grabs information from the forms
+	username = request.form['username']
+	user_password = request.form['password']
+
+    #cursor used to send queries
+	cursor = conn.cursor()
+
+	#executes query
+	query = 'SELECT * FROM airline_staff WHERE username = %s and user_password = MD5(%s)'
+	cursor.execute(query, (username, user_password))
+	#stores the results in a variable
+	data = cursor.fetchone()
+	#use fetchall() if you are expecting more than 1 data row
+	cursor.close()
+	error = None
+	if(data):
+		#creates a session for the the user
+		#session is a built in
+        session['type'] = 'staff'
+        session['username'] = username
+        return redirect(url_for('staff_home'))
+	else:
+		#returns an error message to the html page
+		error = 'Invalid login or username'
+		return render_template('staff_login.html', error=error)
+
+
+###############################################################################
+###############################################################################
+########################## Customer Home Pages ################################
+
+
+@app.route('/customer_home',methods=['GET', 'POST'])
+def customer_home():
+    if session.get('type')!='customer' or not session.get('username'):
+        return redirect('/')
+    username = session['username']
+    return render_template('customer_home.html', username=username)
+
+
+###############################################################################
+###############################################################################
+############################# Staff Pages #####################################
+
+
+@app.route('/staff_home',methods=['GET', 'POST'])
+def staff_home():
+    
+    username = session['username']
+    cursor = conn.cursor();
+    query = 'SELECT ts, blog_post FROM blog WHERE username = %s ORDER BY ts DESC'
+    cursor.execute(query, (username))
+    data1 = cursor.fetchall() 
+    for each in data1:
+        print(each['blog_post'])
+    cursor.close()
+    return render_template('staff_home.html', username=username, posts=data1)\
+
+
+###############################################################################
+###############################################################################
+################################# Log Out #####################################
+
+@app.route('/log_out')
+def log_out():
+    session['type']=None
+    session['username']=None
+    return render_template('/')
 
 if __name__ == "__main__":
 	app.run('127.0.0.1', 5000, debug=True)
