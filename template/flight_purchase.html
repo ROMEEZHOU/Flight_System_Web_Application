@@ -144,11 +144,14 @@
             Price: <input type="hidden" name="price" value="{{price}}"> {{price}} </br>
             Flight Status: <input type="hidden" name="flight_status" value="{{flight_status}}"> {{flight_status}} </br>
             Airplane Id: <input type="hidden" name="id_num" value="{{id_num}}"> {{id_num}} </br>
-
+            </br>
             Ticket id: <input type="hidden" name="ticket_id" value="{{ticket_id}}"> {{ticket_id}} </br>
             Email: <input type="hidden" name="email" value="{{email}}"> {{email}} </br>
             Name: <input type="hidden" name="name" value="{{username}}">{{username}} </br>
-            Card Type: <input id="post_bar" type="text" name = "card_type" placeholder="card type" required/> </br>
+            Card Type: <select name="card_type">
+                <option value="credit">credit</option>
+                <option value="debit">debit</option>
+            </select> </br>
             Card Number: <input id="post_bar" type="text" name = "card_number" placeholder="card number" required/> </br>
             Name on Card: <input id="post_bar" type="text" name = "name_on_card" placeholder="name on card" required/> </br>
             Expiration Date: <input id="post_bar" type="date" name = "expiration_date" required/> </br>

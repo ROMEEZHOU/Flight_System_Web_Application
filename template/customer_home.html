@@ -26,6 +26,27 @@
 	.navigation a:hover {
   		background: #1565C0;
 	}
+
+    .navigation2 {
+  		display: flex;
+  		flex-flow: row wrap;
+  		justify-content: flex-start;
+  
+  		list-style: none;
+  		margin: 0; 
+  		background: #6598d3;
+	}
+
+	.navigation2 a {
+  		text-decoration: none;
+  		display: block;
+  		padding: 1em;
+  		color: white;
+	}
+
+	.navigation2 a:hover {
+  		background: #1565C0;
+	}
 	
 	h1 {
         color: #1565C0;
@@ -125,8 +146,8 @@
 				</div>
 			</div>
 			<input id="post_button" type="submit" value="Search Flight" />
-			{% if error %}
-            	<p class="error"><strong>Error:</strong> {{error}}</p>
+			{% if error1 %}
+            	<p class="error"><strong>Error:</strong> {{error1}}</p>
         	{% endif %}
 			
 		</form>
@@ -155,8 +176,8 @@
 				</div>
 			</div>
 			<input id="post_button" type="submit" value="Search Flight Status" />
-			{% if error %}
-            	<p class="error"><strong>Error:</strong> {{error}}</p>
+			{% if error2 %}
+            	<p class="error"><strong>Error:</strong> {{error2}}</p>
         	{% endif %}
 			
 		</form>
@@ -270,7 +291,10 @@
 		</table>
 	</div>
 	{% endif %}
-
+    
+    <div class="navigation2">
+        <a href="/customer_home_init">Go back</a>
+    </div>
 </body>
 
 </html>

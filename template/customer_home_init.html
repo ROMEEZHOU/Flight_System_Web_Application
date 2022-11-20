@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+</head>
+
+<style type="text/css">
+	.navigation {
+  		display: flex;
+  		flex-flow: row wrap;
+  		justify-content: flex-end;
+  
+  		list-style: none;
+  		margin: 0; 
+  		background: #6598d3;
+	}
+
+	.navigation a {
+  		text-decoration: none;
+  		display: block;
+  		padding: 1em;
+  		color: white;
+	}
+
+	.navigation a:hover {
+  		background: #1565C0;
+	}
+	
+	h1 {
+        color: #1565C0;
+        font-family: arial;
+    }
+
+	h2 {
+        color: #1565C0;
+        font-family: arial;
+    }
+
+	#post_button {
+        float: left;
+        background-color: #1565C0;
+        border: none;
+        color: white;
+        padding: 4px;
+        font-size: 14px;
+        border-radius: 2px;
+	}
+    #post_button:hover {
+        background-color: #6598d3;
+	}
+
+    .button a{
+        background-color: #1565C0;
+        border: none;
+        color: white;
+        display: inline-block;
+        padding: 4px;
+        font-size: 14px;
+        border-radius: 2px;
+    }
+    .button a :hover{
+        background-color: #6598d3;
+    }
+
+    .parent {
+        border: 6px solid #1565C0;
+        margin: 1rem;
+        padding: 2rem 2rem;
+        text-align: left;
+    }
+    .child {
+        display: inline-block;
+        padding: 4px;
+        vertical-align: middle;
+    }
+    .child a {
+  		text-decoration: none;
+  		display: block;
+  		padding: 1em;
+  		color: white;
+        background-color: #1565C0;
+	}
+
+	.child a:hover {
+  		background: #6598d3;
+	}
+
+	.table11_7 table {
+        width:100%;
+        margin:15px 0;
+        border:0;
+    }
+    .table11_7 th {
+        background-color:#6598d3;
+        color:#FFFFFF
+    }
+    .table11_7,.table11_7 th,.table11_7 td {
+        font-size:0.95em;
+        text-align:center;
+        padding:4px;
+        border-collapse:collapse;
+    }
+    .table11_7 th,.table11_7 td {
+        border: 1px solid #6598d3;
+        border-width:1px 0 1px 0;
+        border:2px inset #ffffff;
+    }
+    .table11_7 tr {
+        border: 1px solid #b1c9e4;
+    }
+    .table11_7 tr:nth-child(odd){
+        background-color:#b1c9e4;
+    }
+    .table11_7 tr:nth-child(even){
+        background-color:#ffffff;
+    }
+
+
+
+</style>
+
+<body>
+    <div>
+        
+		<ul class="navigation">
+			<li><a href="/log_out">Log Out </a></li>
+		</ul>
+	</div>
+
+    <form action="/post" method="POST">
+        <h1>Welcome {{username}} !</h1>
+        <h1>Welcome to Romee's Flight Booking System！</h1>
+    </form>
+
+    <div class="parent">
+        <div class="child">
+            <a href="/customer_home">Search for Flights</a>
+        </div>
+        <div class="child">
+            <a href="/customer_previous">View Previous Flights</a>
+        </div>
+        <div class="child">
+            <a href="/customer_spending">View Spending</a>
+        </div>
+    </div>
+
+
+    {% if not post1 %}
+    <h2>You have no future flight</h2>
+    {% endif %}
+
+
+	{% if post1 %}
+	<div>
+		<h2>Your Future Flights</h2>
+		<table class=table11_7>
+			<th>Airline</th>
+			<th>Flight Number</th>
+			<th>Departure Date</th>
+			<th>Departure Time</th>
+			<th>Arrival Date</th>
+			<th>Arrivel Time</th>
+			<th>From</th>
+			<th>To</th>
+			<th>Status</th>
+			<th>Airplane</th>
+            <th>Book Here</th>
+		
+            {% for line in post1 %}
+			<tr>
+				<td>{{line['airline_name']}}</td>
+				<td>{{line['flight_num']}}</td>
+				<td>{{line['dept_date']}}</td>
+				<td>{{line['dept_time']}}</td>
+				<td>{{line['arr_date']}}</td>
+				<td>{{line['arr_time']}}</td>
+				<td>{{line['dept_airport']}}</td>
+				<td>{{line['arr_airport']}}</td>
+				<td>{{line['flight_status']}}</td>
+				<td>{{line['id_num']}}</td>
+
+			</tr>
+
+		{% endfor %}
+		</table>
+	</div>
+	{% endif %}
+    
+</body>
+
+</html>
