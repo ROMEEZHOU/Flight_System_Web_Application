@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, session, url_for, redirect
 import pymysql.cursors
+from datetime import datetime
 
 #Initialize the app from Flask
 app=Flask(__name__,template_folder='template')
@@ -28,8 +29,15 @@ def SearchFlight1():
     destination=request.form['destination']
     dept_date=request.form['dept_date']
     return_date=request.form['return_date']
+    today_date=datetime.today().date()
+    dept_date_obj=datetime.strptime(dept_date, '%Y-%m-%d').date()
+    if dept_date_obj<today_date:
+        return render_template('index.html',error1='Please select a valid departure date')
     if 'round_trip' in request.form:
         if return_date!='':
+            return_date_obj=datetime.strptime(return_date, '%Y-%m-%d').date()
+            if return_date_obj<dept_date_obj:
+                return render_template('index.html',error1='Please select valid departure date and return date')
             cursor=conn.cursor()
             query1='(SELECT * FROM flight WHERE dept_airport= %s AND arr_airport= %s AND dept_date = %s) UNION (SELECT * FROM flight WHERE dept_airport= %s AND dept_date= %s AND arr_airport IN (SELECT name FROM airport WHERE city= %s)) UNION (SELECT * FROM flight WHERE arr_airport= %s AND dept_date= %s AND dept_airport IN (SELECT name FROM airport WHERE city= %s)) UNION (SELECT * FROM flight WHERE dept_date= %s AND dept_airport IN (SELECT name FROM airport WHERE city= %s) AND arr_airport IN (SELECT name FROM airport WHERE city = %s))'
             cursor.execute(query1, (departure, destination, dept_date, departure, dept_date, destination, destination, dept_date, departure, dept_date, departure, destination))
@@ -43,7 +51,7 @@ def SearchFlight1():
             return render_template('index.html',post1=data1,post2=data2)
 
         else:
-            return render_template('index.html',error='Please select the return date')
+            return render_template('index.html',error1='Please select the return date')
 
     else:
         cursor=conn.cursor()
@@ -74,7 +82,7 @@ def search_flight_status():
 
     if dept_date=='':
         if arr_date=='':
-            return render_template('index.html',error='Please enter either departure date or arrival date')
+            return render_template('index.html',error2='Please enter either departure date or arrival date')
         else:
             cursor=conn.cursor()
             query='SELECT * FROM flight WHERE airline_name= %s AND flight_num = %s AND arr_date= %s'
@@ -255,7 +263,7 @@ def customer_login_auth():
         session['type']='customer'
         session['email']=email
         session['username'] = data['name']
-        return redirect(url_for('customer_home'))
+        return redirect(url_for('customer_home_init'))
     else:
     	#returns an error message to the html page
     	error = 'Invalid login or username'
@@ -294,6 +302,20 @@ def staff_login_auth():
 ###############################################################################
 ########################## Customer Home Pages ################################
 
+@app.route('/customer_home_init',methods=['GET', 'POST'])
+def customer_home_init():
+    if session.get('type')!='customer' or not session.get('username'):
+        return redirect('/')
+    username=session['username']
+    email = session['email']
+    cursor=conn.cursor()
+    query='SELECT airline_name, flight_num, dept_date, dept_time, arr_date, arr_time, dept_airport, arr_airport, flight_status FROM ticket NATURAL JOIN purchase NATURAL JOIN flight WHERE email=%s AND (dept_date=CURDATE() AND dept_time>=CURRENT_TIME()) OR dept_date>CURDATE()'
+    cursor.execute(query,(email))
+    data=cursor.fetchall()
+    return render_template('customer_home_init.html',username=username,post1=data)
+
+
+
 
 @app.route('/customer_home',methods=['GET', 'POST'])
 def customer_home():
@@ -308,8 +330,15 @@ def customer_search_flight():
     destination=request.form['destination']
     dept_date=request.form['dept_date']
     return_date=request.form['return_date']
+    today_date=datetime.today().date()
+    dept_date_obj=datetime.strptime(dept_date, '%Y-%m-%d').date()
+    if dept_date_obj<today_date:
+        return render_template('customer_home.html',error1='Please select a valid departure date')
     if 'round_trip' in request.form:
         if return_date!='':
+            return_date_obj=datetime.strptime(return_date, '%Y-%m-%d').date()
+            if return_date_obj<dept_date_obj:
+                return render_template('customer_home.html',error1='Please select valid departure date and return date')
             cursor=conn.cursor()
             query1='(SELECT * FROM flight WHERE dept_airport= %s AND arr_airport= %s AND dept_date = %s) UNION (SELECT * FROM flight WHERE dept_airport= %s AND dept_date= %s AND arr_airport IN (SELECT name FROM airport WHERE city= %s)) UNION (SELECT * FROM flight WHERE arr_airport= %s AND dept_date= %s AND dept_airport IN (SELECT name FROM airport WHERE city= %s)) UNION (SELECT * FROM flight WHERE dept_date= %s AND dept_airport IN (SELECT name FROM airport WHERE city= %s) AND arr_airport IN (SELECT name FROM airport WHERE city = %s))'
             cursor.execute(query1, (departure, destination, dept_date, departure, dept_date, destination, destination, dept_date, departure, dept_date, departure, destination))
@@ -323,7 +352,7 @@ def customer_search_flight():
             return render_template('customer_home.html',post1=data1,post2=data2)
 
         else:
-            return render_template('customer_home.html',error='Please select the return date')
+            return render_template('customer_home.html',error1='Please select the return date')
 
     else:
         cursor=conn.cursor()
