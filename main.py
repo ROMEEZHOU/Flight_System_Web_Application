@@ -108,6 +108,7 @@ def search_flight_status():
 #Define route for login
 @app.route('/login')
 def login():
+    
     return render_template('login.html')
 
 #Define route for register
@@ -252,6 +253,7 @@ def customer_login_auth():
     error = None
     if data:
         session['type']='customer'
+        session['email']=email
         session['username'] = data['name']
         return redirect(url_for('customer_home'))
     else:
@@ -337,6 +339,7 @@ def book_flight():
     if session.get('type')!='customer' or not session.get('username'):
         return redirect('/')
     username = session['username']
+    email=session['email']
     airline=request.form['airline_name']
     flight_num=request.form['flight_num']
     dept_date=request.form['dept_date']
@@ -349,7 +352,7 @@ def book_flight():
     flight_status=request.form['flight_status']
     id_num=request.form['id_num']
     ticket_id=0
-    return render_template('flight_purchase.html',airline=airline, flight_num=flight_num,dept_date=dept_date,dept_time=dept_time,arr_date=arr_date, arr_time=arr_time, dept_airport=dept_airport, flight_status=flight_status,id_num=id_num,price=base_price,ticket_id=ticket_id,username=username)
+    return render_template('flight_purchase.html',airline=airline, flight_num=flight_num,dept_date=dept_date,dept_time=dept_time,arr_date=arr_date, arr_time=arr_time, dept_airport=dept_airport, flight_status=flight_status,id_num=id_num,price=base_price,ticket_id=ticket_id,username=username,email=email)
 
 @app.route('/purchase_flight',methods=['GET','POST'])
 def purchase_flight():
@@ -377,6 +380,7 @@ def staff_home():
 def log_out():
     session['type']=None
     session['username']=None
+    session['email']=None
     return redirect('/')
 
 
