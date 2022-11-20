@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+</head>
+
+<style type="text/css">
+	.navigation {
+  		display: flex;
+  		flex-flow: row wrap;
+  		justify-content: flex-end;
+  
+  		list-style: none;
+  		margin: 0; 
+  		background: #6598d3;
+	}
+
+	.navigation a {
+  		text-decoration: none;
+  		display: block;
+  		padding: 1em;
+  		color: white;
+	}
+
+	.navigation a:hover {
+  		background: #1565C0;
+	}
+
+    .navigation2 {
+  		display: flex;
+  		flex-flow: row wrap;
+  		justify-content: flex-start;
+  
+  		list-style: none;
+  		margin: 0; 
+  		background: #6598d3;
+	}
+
+	.navigation2 a {
+  		text-decoration: none;
+  		display: block;
+  		padding: 1em;
+  		color: white;
+	}
+
+	.navigation2 a:hover {
+  		background: #1565C0;
+	}
+	
+	h1 {
+        color: #1565C0;
+        font-family: arial;
+    }
+
+	h2 {
+        color: #1565C0;
+        font-family: arial;
+    }
+
+	#post_button {
+        float: center;
+        background-color: #1565C0;
+        border: none;
+        color: white;
+        padding: 4px;
+        font-size: 14px;
+        border-radius: 2px;
+	}
+
+    #post_button:hover {
+        background-color: #6598d3;
+	}
+
+	.table11_7 table {
+        width:100%;
+        margin:15px 0;
+        border:0;
+    }
+    .table11_7 th {
+        background-color:#6598d3;
+        color:#FFFFFF
+    }
+    .table11_7,.table11_7 th,.table11_7 td {
+        font-size:0.95em;
+        text-align:center;
+        padding:4px;
+        border-collapse:collapse;
+    }
+    .table11_7 th,.table11_7 td {
+        border: 1px solid #6598d3;
+        border-width:1px 0 1px 0;
+        border:2px inset #ffffff;
+    }
+    .table11_7 tr {
+        border: 1px solid #b1c9e4;
+    }
+    .table11_7 tr:nth-child(odd){
+        background-color:#b1c9e4;
+    }
+    .table11_7 tr:nth-child(even){
+        background-color:#ffffff;
+    }
+
+    .parent {
+        border: 6px solid #1565C0;
+        margin: 1rem;
+        padding: 2rem 2rem;
+        text-align: center;
+    }
+    .child {
+        display: inline-block;
+        padding: 1rem 1rem;
+        vertical-align: middle;
+    }
+
+
+
+</style>
+
+<body>
+    <div>
+        
+		<ul class="navigation">
+			<li><a href="/log_out">Log Out </a></li>
+		</ul>
+	</div>
+
+    <form action="/post" method="POST">
+        <h1>Welcome {{username}} !</h1>
+        <h1>Welcome to Romee's Flight Booking System！</h1>
+    </form>
+
+    <div class="parent";>
+        <form action="/purchase_flight" method="POST">
+            Airline: <input type="hidden" name="airline_name" value="{{airline}}"> {{airline}} </br>
+            Flight_num: <input type="hidden" name="flight_num" value="{{flight_num}}"> {{flight_num}} </br>
+            Departure Date: <input type="hidden" name="dept_date" value="{{dept_date}}"> {{dept_date}} </br>
+            Departure Time: <input type="hidden" name="dept_time" value="{{dept_time}}"> {{dept_time}} </br>
+            Arrival Date: <input type="hidden" name="arr_date" value="{{arr_date}}"> {{arr_date}} </br>
+            Arrival Time: <input type="hidden" name="arr_time" value="{{arr_time}}"> {{arr_time}} </br>
+            Departure Airport: <input type="hidden" name="dept_airport" value="{{dept_airport}}"> {{dept_airport}} </br>
+            Arrival Airport: <input type="hidden" name="arr_airport" value="{{arr_airport}}"> {{arr_airport}} </br>
+            Price: <input type="hidden" name="price" value="{{price}}"> {{price}} </br>
+            Flight Status: <input type="hidden" name="flight_status" value="{{flight_status}}"> {{flight_status}} </br>
+            Airplane Id: <input type="hidden" name="id_num" value="{{id_num}}"> {{id_num}} </br>
+
+            Ticket id: <input type="hidden" name="ticket_id" value="{{ticket_id}}"> {{ticket_id}} </br>
+            Email: <input type="hidden" name="email" value="{{email}}"> {{email}} </br>
+            Name: <input type="hidden" name="name" value="{{username}}">{{username}} </br>
+            Card Type: <input id="post_bar" type="text" name = "card_type" placeholder="card type" required/> </br>
+            Card Number: <input id="post_bar" type="text" name = "card_number" placeholder="card number" required/> </br>
+            Name on Card: <input id="post_bar" type="text" name = "name_on_card" placeholder="name on card" required/> </br>
+            Expiration Date: <input id="post_bar" type="date" name = "expiration_date" required/> </br>
+            
+            <input id="post_button" type="submit" value= 'Comfirm Purchase' />
+            {% if error %}
+                <p class="error"><strong>Error:</strong> {{error}}</p>
+            {% endif %}
+        </form>
+    </div>
+    
+    <div class="navigation2" >
+        <a href="/customer_home">Go back</a>
+    </div>
+
+</body>
+
+</html>

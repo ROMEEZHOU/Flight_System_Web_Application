@@ -300,6 +300,61 @@ def customer_home():
     username = session['username']
     return render_template('customer_home.html', username=username)
 
+@app.route('/customer_search_flight',methods=['GET', 'POST'])
+def customer_search_flight():
+    departure = request.form['departure']
+    destination=request.form['destination']
+    dept_date=request.form['dept_date']
+    return_date=request.form['return_date']
+    if 'round_trip' in request.form:
+        if return_date!='':
+            cursor=conn.cursor()
+            query1='(SELECT * FROM flight WHERE dept_airport= %s AND arr_airport= %s AND dept_date = %s) UNION (SELECT * FROM flight WHERE dept_airport= %s AND dept_date= %s AND arr_airport IN (SELECT name FROM airport WHERE city= %s)) UNION (SELECT * FROM flight WHERE arr_airport= %s AND dept_date= %s AND dept_airport IN (SELECT name FROM airport WHERE city= %s)) UNION (SELECT * FROM flight WHERE dept_date= %s AND dept_airport IN (SELECT name FROM airport WHERE city= %s) AND arr_airport IN (SELECT name FROM airport WHERE city = %s))'
+            cursor.execute(query1, (departure, destination, dept_date, departure, dept_date, destination, destination, dept_date, departure, dept_date, departure, destination))
+            data1=cursor.fetchall()
+
+            query2='(SELECT * FROM flight WHERE dept_airport= %s AND arr_airport= %s AND dept_date = %s) UNION (SELECT * FROM flight WHERE dept_airport= %s AND dept_date= %s AND arr_airport IN (SELECT name FROM airport WHERE city= %s)) UNION (SELECT * FROM flight WHERE arr_airport= %s AND dept_date= %s AND dept_airport IN (SELECT name FROM airport WHERE city= %s)) UNION (SELECT * FROM flight WHERE dept_date= %s AND dept_airport IN (SELECT name FROM airport WHERE city= %s) AND arr_airport IN (SELECT name FROM airport WHERE city = %s))'
+            cursor.execute(query1, (destination, departure, return_date, destination, return_date, departure, departure, return_date, destination, return_date, destination, departure))
+            data2=cursor.fetchall()
+            cursor.close()
+
+            return render_template('customer_home.html',post1=data1,post2=data2)
+
+        else:
+            return render_template('customer_home.html',error='Please select the return date')
+
+    else:
+        cursor=conn.cursor()
+        query='(SELECT * FROM flight WHERE dept_airport= %s AND arr_airport= %s AND dept_date = %s) UNION (SELECT * FROM flight WHERE dept_airport= %s AND dept_date= %s AND arr_airport IN (SELECT name FROM airport WHERE city= %s)) UNION (SELECT * FROM flight WHERE arr_airport= %s AND dept_date= %s AND dept_airport IN (SELECT name FROM airport WHERE city= %s)) UNION (SELECT * FROM flight WHERE dept_date= %s AND dept_airport IN (SELECT name FROM airport WHERE city= %s) AND arr_airport IN (SELECT name FROM airport WHERE city = %s))'
+        cursor.execute(query, (departure, destination, dept_date, departure, dept_date, destination, destination, dept_date, departure, dept_date, departure, destination))
+        data=cursor.fetchall()
+        cursor.close()
+        return render_template('customer_home.html',post1=data)
+
+
+@app.route('/book_flight',methods=['GET', 'POST'])
+def book_flight():
+    if session.get('type')!='customer' or not session.get('username'):
+        return redirect('/')
+    username = session['username']
+    airline=request.form['airline_name']
+    flight_num=request.form['flight_num']
+    dept_date=request.form['dept_date']
+    dept_time=request.form['dept_time']
+    arr_date=request.form['arr_date']
+    arr_time=request.form['arr_time']
+    dept_airport=request.form['dept_airport']
+    arr_airport=request.form['arr_airport']
+    base_price=request.form['base_price']
+    flight_status=request.form['flight_status']
+    id_num=request.form['id_num']
+    ticket_id=0
+    return render_template('flight_purchase.html',airline=airline, flight_num=flight_num,dept_date=dept_date,dept_time=dept_time,arr_date=arr_date, arr_time=arr_time, dept_airport=dept_airport, flight_status=flight_status,id_num=id_num,price=base_price,ticket_id=ticket_id,username=username)
+
+@app.route('/purchase_flight',methods=['GET','POST'])
+def purchase_flight():
+    pass
+
 
 ###############################################################################
 ###############################################################################
@@ -311,7 +366,7 @@ def staff_home():
     if session.get('type')!='staff' or not session.get('username'):
         return redirect('/')
     username = session['username']
-    return render_template('staff_home.html', username=username)
+    return render_template('staff_home.html', email=username,username=username)
 
 
 ###############################################################################

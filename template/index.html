@@ -46,6 +46,9 @@
         font-size: 14px;
         border-radius: 2px;
 	}
+	#post_button:hover {
+        background-color: #6598d3;
+	}
 
 	.table11_7 table {
         width:100%;
@@ -89,7 +92,7 @@
 		</ul>
 	</div>
 
-	<h1>Welcome to Romee's Flight Booking System！</h1>
+	<h1>Welcome to Romee's Flight Booking System!</h1>
 
 	<div style="min-height: 70px; flex: 1;">
 		<form action="/SearchFlight1" method="POST">
@@ -185,7 +188,9 @@
 				<td>{{line['base_price']}}</td>
 				<td>{{line['flight_status']}}</td>
 				<td>{{line['id_num']}}</td>
+
 			</tr>
+
 		{% endfor %}
 		</table>
 	</div>
