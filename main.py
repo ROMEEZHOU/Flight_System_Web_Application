@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, session, url_for, redirect
 import pymysql.cursors
-from datetime import datetime
+from datetime import datetime, date
+import random
 
 #Initialize the app from Flask
 app=Flask(__name__,template_folder='template')
@@ -380,13 +381,45 @@ def book_flight():
     base_price=request.form['base_price']
     flight_status=request.form['flight_status']
     id_num=request.form['id_num']
-    ticket_id=0
+    ticket_id=generate_random_str()
+    cursor=conn.cursor()
+    id_query='SELECT * FROM ticket WHERE ticket_id=%s'
+    cursor.execute(id_query,(ticket_id))
+    data=cursor.fetchall()
+    while date:
+        ticket_id=generate_random_str()
+        cursor.execute(id_query,(ticket_id))
+        data=cursor.fetchall()
+    cursor.close()
     return render_template('flight_purchase.html',airline=airline, flight_num=flight_num,dept_date=dept_date,dept_time=dept_time,arr_date=arr_date, arr_time=arr_time, dept_airport=dept_airport, flight_status=flight_status,id_num=id_num,price=base_price,ticket_id=ticket_id,username=username,email=email)
 
 @app.route('/purchase_flight',methods=['GET','POST'])
 def purchase_flight():
-    pass
+    airline_name=request.form['airline_name']
+    flight_num=request.form['flight_num']
+    dept_date=request.form['dept_date']
+    dept_time=request.form['dept_time']
+    price=request.form['price']
+    ticket_id=request.form['ticket_id']
+    email=request.form['email']
+    card_type=request.form['card_type']
+    card_number=request.form['card_number']
+    name_on_card=request.form['name_on_card']
+    expiration_date=request.form['expiration_date']
+    today=date.today()
+    purchase_date=today.strftime("%y-%m-%d")
+    now=datetime.now()
+    purchase_time=now.strftime("%H:%M:%S")
+    
+    cursor=conn.cursor()
+    query_ticket='INSERT INTO ticket value(%s,%s,%s,%s,%s)'
+    cursor.execute(query_ticket,(ticket_id,airline_name,flight_num,dept_date,dept_time))
 
+    query_purchae='INSERT INTO purchase value(%s,%s,%s,%s,%s,%s,%s,%s,%s)'
+    cursor.execute(query_purchae,(ticket_id,email,price,card_type,card_number,name_on_card,expiration_date,purchase_date,purchase_time))
+
+    cursor.close()
+    return render_template('purchase_success.html')
 
 ###############################################################################
 ###############################################################################
@@ -411,6 +444,14 @@ def log_out():
     session['username']=None
     session['email']=None
     return redirect('/')
+
+def generate_random_str(randomlength=29):
+    random_str =''
+    base_str ='ABCDEFGHIGKLMNOPQRSTUVWXYZabcdefghigklmnopqrstuvwxyz0123456789'
+    length =len(base_str) -1
+    for i in range(randomlength):
+        random_str +=base_str[random.randint(0, length)]
+    return random_str
 
 
 app.secret_key = 'Flight System Romee'
