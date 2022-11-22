@@ -50,6 +50,44 @@
         background-color: #6598d3;
 	}
 
+    .button a{
+        background-color: #1565C0;
+        border: none;
+        color: white;
+        display: inline-block;
+        padding: 4px;
+        font-size: 14px;
+        border-radius: 2px;
+    }
+    .button a :hover{
+        background-color: #6598d3;
+    }
+
+    .parent {
+        border: 6px solid #1565C0;
+        margin: 1rem;
+        padding: 2rem 2rem;
+        display: flex;
+        text-align: left;
+        flex-wrap: wrap;
+    }
+    .child {
+        display: flex;
+        padding: 4px;
+        vertical-align: middle;
+    }
+    .child a {
+  		text-decoration: none;
+  		display: block;
+  		padding: 1em;
+  		color: white;
+        background-color: #1565C0;
+	}
+
+	.child a:hover {
+  		background: #6598d3;
+	}
+
 	.table11_7 table {
         width:100%;
         margin:15px 0;
@@ -97,6 +135,112 @@
         <h1>Welcome to Romee's Flight Booking System！</h1>
     </form>
 
+    <div class="parent">
+        <div class="child">
+            <a href="/add_flight">Add Flight</a>
+        </div>
+        <div class="child">
+            <a href="/change_flight_status">Change Flight Status</a>
+        </div>
+        <div class="child">
+            <a href="/add_airplane">Add Airplane</a>
+        </div>
+        <div class="child">
+            <a href="/add_airport">Add Airport</a>
+        </div>
+        <div class="child">
+            <a href="/flight_ratings">Flight Ratings</a>
+        </div>
+        <div class="child">
+            <a href="/frequent_customer">Frequent Customers</a>
+        </div>
+        <div class="child">
+            <a href="/view_report">View Report</a>
+        </div>
+        <div class="child">
+            <a href="/view_revenue">View Revenue</a>
+        </div>
+    </div>
+
+    <h2>View Flight</h2>
+    <div style="min-height: 70px; flex: 1;">
+		<form action="/staff_view_flight" method="POST">
+			<div style="display: table;">
+				<div style="display: table-cell;">
+					Departure: <input type="text" name = "departure" placeholder="departure city/airport" required/> </br>
+				</div>
+				&nbsp;
+				&nbsp;
+				<div style="display: table-cell;">
+					Destination: <input type="text" name = "destination" placeholder="destination city/airport" required/> </br>
+				</div>
+				&nbsp;
+				&nbsp;
+				<div style="display: table-cell;">
+					Start Date: <input type="date" name = "start_date" required/> </br>
+				</div>
+				&nbsp;
+				&nbsp;
+				<div style="display: table-cell;">
+					End Date: <input type="date" name = "end_date" required/> </br>
+				</div>
+			</div>
+			<input id="post_button" type="submit" value="View Flight" />
+			{% if error1 %}
+            	<p class="error"><strong>Error:</strong> {{error1}}</p>
+        	{% endif %}
+			
+		</form>
+	</div>
+
+
+    {% if not post1 %}
+    <h2>There is no flight of {{airline}} in the future 30 days</h2>
+    {% endif %}
+
+    {% if post1 %}
+	<div>
+		<h2>Flights of {{airline}} (default: future 30 days)</h2>
+		<table class=table11_7>
+			<th>Airline</th>
+			<th>Flight Number</th>
+			<th>Departure Date</th>
+			<th>Departure Time</th>
+			<th>Arrival Date</th>
+			<th>Arrivel Time</th>
+			<th>From</th>
+			<th>To</th>
+            <th>Base Price</th>
+			<th>Status</th>
+			<th>Airplane</th>
+            <th>View Customer</th>
+		
+            {% for line in post1 %}
+            <form action="/view_customer" method="POST">
+                <tr>
+				<td><input type="hidden" name="airline_name" value="{{line['airline_name']}}">{{line['airline_name']}}</td>
+				<td><input type="hidden" name="flight_num" value="{{line['flight_num']}}">{{line['flight_num']}}</td>
+				<td><input type="hidden" name="dept_date" value="{{line['dept_date']}}">{{line['dept_date']}}</td>
+				<td><input type="hidden" name="dept_time" value="{{line['dept_time']}}">{{line['dept_time']}}</td>
+				<td><input type="hidden" name="arr_date" value="{{line['arr_date']}}">{{line['arr_date']}}</td>
+				<td><input type="hidden" name="arr_time" value="{{line['arr_time']}}">{{line['arr_time']}}</td>
+				<td><input type="hidden" name="dept_airport" value="{{line['dept_airport']}}">{{line['dept_airport']}}</td>
+				<td><input type="hidden" name="arr_airport" value="{{line['arr_airport']}}">{{line['arr_airport']}}</td>
+                <td><input type="hidden" name="base_price" value="{{line['base_price']}}">{{line['base_price']}}</td>
+				<td><input type="hidden" name="flight_status" value="{{line['flight_status']}}">{{line['flight_status']}}</td>
+				<td><input type="hidden" name="id_num" value="{{line['id_num']}}">{{line['id_num']}}</td>
+                <td><input id="post_button" type="submit" value="View Customer" /></td>				
+
+			</tr>
+
+            </form>
+			
+		{% endfor %}
+		</table>
+	</div>
+	{% endif %}
+
+    
 </body>
 
 </html>

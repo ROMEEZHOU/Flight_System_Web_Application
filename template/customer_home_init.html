@@ -168,7 +168,7 @@
             <th>Cancel Flight</th>
 		
             {% for line in post1 %}
-            <form>
+            <form action="/customer_cancel_flight" method="POST">
                 <tr>
 				<td><input type="hidden" name="airline_name" value="{{line['airline_name']}}">{{line['airline_name']}}</td>
 				<td><input type="hidden" name="flight_num" value="{{line['flight_num']}}">{{line['flight_num']}}</td>

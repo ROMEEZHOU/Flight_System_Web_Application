@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, session, url_for, redirect
 import pymysql.cursors
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 import random
 
 #Initialize the app from Flask
@@ -22,6 +22,10 @@ conn = pymysql.connect(host='localhost',
 
 @app.route('/')
 def hello():
+    session['type']=None
+    session['username']=None
+    session['email']=None
+    session['airline']=None
     return render_template('index.html',posts='')
 
 @app.route('/SearchFlight1',methods=['GET', 'POST'])
@@ -218,11 +222,10 @@ def staff_register_auth():
     error = None
 
     query2='SELECT * FROM airline WHERE name = %s'
-    cursor.execute(query1, (airline))
+    cursor.execute(query2, (airline))
     data2 = cursor.fetchone()
     if not data2:
         error = 'This airline does not exist'
-        con.commit()
         cursor.close()
         return render_template('staff_register.html', error = error)
 
@@ -240,11 +243,11 @@ def staff_register_auth():
         cursor.execute(ins, (username, user_password, first_name, last_name, date_of_birth, airline))
         for phone_n in phone_list:
             ins_phone = 'INSERT INTO staff_phone VALUES(%s, %s)'
-            cursor.execute(ins,(username,phone_n))
+            cursor.execute(ins_phone,(username,phone_n))
 
         for e in email_list:
             ins_email='INSERT INTO staff_email VALUES(%s, %s)'
-            cursor.execute(ins,(username,e))
+            cursor.execute(ins_email,(username,e))
 
         conn.commit()
         cursor.close()
@@ -298,6 +301,7 @@ def staff_login_auth():
         #creates a session for the the user
         #session is a built in
         session['type'] = 'staff'
+        session['airline']=data['airline']
         session['username'] = username
         return redirect(url_for('staff_home'))
     else:
@@ -444,8 +448,109 @@ def purchase_flight():
 def staff_home():
     if session.get('type')!='staff' or not session.get('username'):
         return redirect('/')
+    airline=session['airline']
     username = session['username']
-    return render_template('staff_home.html', email=username,username=username)
+    today_date=datetime.today().date()
+    end_date=today_date+timedelta(30)
+    today_date_str=today_date.strftime("%y-%m-%d")
+    end_date_str=end_date.strftime("%y-%m-%d")
+
+    cursor=conn.cursor()
+    query='SELECT * FROM flight WHERE airline_name= %s AND (dept_date BETWEEN %s AND %s)' 
+    cursor.execute(query,(airline,today_date_str,end_date_str))
+    data=cursor.fetchall()
+    cursor.close()
+    
+    return render_template('staff_home.html',airline=airline, username=username, post1=data)
+
+@app.route('/staff_view_flight', methods=['GET','POST'])
+def staff_view_flight():
+    airline=session['airline']
+    username=session['username']
+    departure=request.form['departure']
+    destination=request.form['destination']
+    start_date=request.form['start_date']
+    end_date=request.form['end_date']
+
+    cursor=conn.cursor()
+    query1='(SELECT * FROM flight WHERE dept_airport= %s AND arr_airport= %s AND (dept_date BETWEEN %s AND %s)) UNION (SELECT * FROM flight WHERE dept_airport= %s AND (dept_date BETWEEN %s AND %s) AND arr_airport IN (SELECT name FROM airport WHERE city= %s)) UNION (SELECT * FROM flight WHERE arr_airport= %s AND (dept_date BETWEEN %s AND %s) AND dept_airport IN (SELECT name FROM airport WHERE city= %s)) UNION (SELECT * FROM flight WHERE (dept_date BETWEEN %s AND %s) AND dept_airport IN (SELECT name FROM airport WHERE city= %s) AND arr_airport IN (SELECT name FROM airport WHERE city = %s))'
+    cursor.execute(query1,(departure,destination,start_date,end_date,departure,start_date,end_date,destination,destination,start_date,end_date,departure,start_date,end_date,departure,destination))
+
+    data=cursor.fetchall()
+    cursor.close()
+    
+    return render_template('staff_home.html',airline=airline, username=username, post1=data)
+
+    '''
+    if departure=='' and destination==''  and start_date=='' and end_date=='':
+        return render_template('staff_home.html',airline=airline, username=username, error='Please enter at least one filter')
+    elif departure=='' and destination=='' and start_date=='' and end_date!='':
+        cursor=conn.cursor()
+        query='SELECT * FROM flight WHERE airline_name= %s AND (dept_date < %s)' 
+        cursor.execute(query,(airline,end_date))
+        data=cursor.fetchall()
+        cursor.close() 
+        return render_template('staff_home.html',airline=airline, username=username, post1=data)
+
+    elif departure=='' and destination=='' and end_date=='' and start_date!='':
+        cursor=conn.cursor()
+        query='SELECT * FROM flight WHERE airline_name= %s AND (dept_date > %s)' 
+        cursor.execute(query,(airline,start_date))
+        data=cursor.fetchall()
+        cursor.close() 
+        return render_template('staff_home.html',airline=airline, username=username, post1=data)
+    
+    elif departure=='' and destination=='' and end_date!='' and start_date!='':
+        cursor=conn.cursor()
+        query='SELECT * FROM flight WHERE airline_name= %s AND (dept_date BETWEEN %s AND %s)' 
+        cursor.execute(query,(airline,start_date,end_date))
+        data=cursor.fetchall()
+        cursor.close() 
+        return render_template('staff_home.html',airline=airline, username=username, post1=data)
+
+    elif departure!='' and destination==''  and start_date=='' and end_date=='':
+        cursor=conn.cursor()
+        query1='(SELECT * FROM flight WHERE dept_airport= %s) UNION (SELECT * FROM flight WHERE dept_airport IN (SELECT name FROM airport WHERE city= %s)) '
+        cursor.execute(query1,(departure,departure))   
+        data=cursor.fetchall()
+        cursor.close() 
+        return render_template('staff_home.html',airline=airline, username=username, post1=data)
+
+    elif departure=='' and destination!=''  and start_date=='' and end_date=='':
+        cursor=conn.cursor()
+        query1='(SELECT * FROM flight WHERE arr_airport= %s) UNION (SELECT * FROM flight WHERE arr_airport IN (SELECT name FROM airport WHERE city= %s)) '
+        cursor.execute(query1,(destination,destination))   
+        data=cursor.fetchall()
+        cursor.close() 
+        return render_template('staff_home.html',airline=airline, username=username, post1=data)
+
+    elif departure!='' and destination!=''  and start_date=='' and end_date=='':
+        cursor=conn.cursor()
+        query1='(SELECT * FROM flight WHERE dept_airport= %s AND arr_airport= %s) UNION (SELECT * FROM flight WHERE dept_airport= %s AND arr_airport IN (SELECT name FROM airport WHERE city= %s)) UNION (SELECT * FROM flight WHERE arr_airport= %s AND dept_airport IN (SELECT name FROM airport WHERE city= %s)) UNION (SELECT * FROM flight WHERE dept_airport IN (SELECT name FROM airport WHERE city= %s) AND arr_airport IN (SELECT name FROM airport WHERE city = %s))'
+        cursor.execute(query1,(departure,destination,departure,destination,destination,departure,departure,destination))
+        data=cursor.fetchall()
+        cursor.close() 
+        return render_template('staff_home.html',airline=airline, username=username, post1=data)
+
+    elif departure!='' and destination!=''  and start_date!='' and end_date=='':'''
+
+@app.route('/view_customer',methods=['GET','POST'])
+def view_customer():
+    flight_num=request.form['flight_num']
+    airline_name=request.form['airline_name']
+    dept_date=request.form['dept_date']
+    dept_time=request.form['dept_time']
+    airline=session['airline']
+    username=session['username']
+
+    cursor=conn.cursor()
+    query='SELECT email,name,building_num,street,city,state,phone_num,passport_num,passport_expiration,passport_country,date_of_birth FROM purchase NATURAL JOIN ticket NATURAL JOIN customer WHERE airline_name= %s AND flight_num= %s AND dept_date= %s AND dept_time= %s'
+    cursor.execute(query,(airline_name,flight_num,dept_date,dept_time))
+    data=cursor.fetchall()
+    cursor.close()
+    
+    return render_template('view_customer.html',airline=airline, flight_num=flight_num, username=username, post1=data)
+
 
 
 ###############################################################################
@@ -457,6 +562,7 @@ def log_out():
     session['type']=None
     session['username']=None
     session['email']=None
+    session['airline']=None
     return redirect('/')
 
 def generate_random_str(randomlength=29):
