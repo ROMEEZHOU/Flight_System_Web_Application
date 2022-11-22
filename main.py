@@ -177,13 +177,15 @@ def customer_register_auth():
     if(data):
     	#If the previous query returns data, then user exists
         error = "This email is been used"
+        cursor.close()
         return render_template('customer_register.html', error = error)
     if not isinstance(building_number, int):
         error = "Building number must be an integer"
+        cursor.close()
         return render_template('customer_register.html', error = error)
         
     else:
-        ins = 'INSERT INTO customer VALUES(%s, %s, %s, %s , %s, %s, %s, %s, %s, %s, %s, %s)'
+        ins = 'INSERT INTO customer VALUES(%s, %s, MD5(%s), %s , %s, %s, %s, %s, %s, %s, %s, %s)'
         cursor.execute(ins, (email, name, customer_password,building_number,street,city,state,phone_number,passport_number,passport_expiration,passport_country,date_of_birth))
         conn.commit()
         cursor.close()
@@ -220,16 +222,21 @@ def staff_register_auth():
     data2 = cursor.fetchone()
     if not data2:
         error = 'This airline does not exist'
+        con.commit()
+        cursor.close()
         return render_template('staff_register.html', error = error)
 
     if(data1):
     	#If the previous query returns data, then user exists
         error = "This username is been already existed"
+        conn.commit()
+        cursor.close()
         return render_template('staff_register.html', error = error)
 
         
     else:
-        ins = 'INSERT INTO airline_staff VALUES(%s, %s, %s, %s , %s, %s)'
+        
+        ins = 'INSERT INTO airline_staff VALUES(%s, MD5(%s), %s, %s , %s, %s)'
         cursor.execute(ins, (username, user_password, first_name, last_name, date_of_birth, airline))
         for phone_n in phone_list:
             ins_phone = 'INSERT INTO staff_phone VALUES(%s, %s)'
@@ -253,7 +260,7 @@ def customer_login_auth():
     cursor = conn.cursor()
 
     #executes query
-    query = 'SELECT name FROM customer WHERE email = %s and customer_password = %s'
+    query = 'SELECT name FROM customer WHERE email = %s and customer_password = MD5(%s)'
     cursor.execute(query, (email, password))
     #stores the results in a variable
     data = cursor.fetchone()
@@ -280,7 +287,7 @@ def staff_login_auth():
     cursor = conn.cursor()
 
     #executes query
-    query = 'SELECT * FROM airline_staff WHERE username = %s and user_password = %s'
+    query = 'SELECT * FROM airline_staff WHERE username = %s and user_password = MD5(%s)'
     cursor.execute(query, (username, user_password))
     #stores the results in a variable
     data = cursor.fetchone()
@@ -310,9 +317,10 @@ def customer_home_init():
     username=session['username']
     email = session['email']
     cursor=conn.cursor()
-    query='SELECT airline_name, flight_num, dept_date, dept_time, arr_date, arr_time, dept_airport, arr_airport, flight_status FROM ticket NATURAL JOIN purchase NATURAL JOIN flight WHERE email=%s AND (dept_date=CURDATE() AND dept_time>=CURRENT_TIME()) OR dept_date>CURDATE()'
+    query='SELECT airline_name, flight_num, dept_date, dept_time, arr_date, arr_time, dept_airport, arr_airport, flight_status, id_num FROM ticket NATURAL JOIN purchase NATURAL JOIN flight WHERE email=%s AND (dept_date=CURDATE() AND dept_time>=CURRENT_TIME()) OR dept_date>CURDATE()'
     cursor.execute(query,(email))
     data=cursor.fetchall()
+    cursor.close()
     return render_template('customer_home_init.html',username=username,post1=data)
 
 
@@ -385,11 +393,12 @@ def book_flight():
     cursor=conn.cursor()
     id_query='SELECT * FROM ticket WHERE ticket_id=%s'
     cursor.execute(id_query,(ticket_id))
-    data=cursor.fetchall()
-    while date:
+    data=cursor.fetchone()
+    while data:
         ticket_id=generate_random_str()
         cursor.execute(id_query,(ticket_id))
         data=cursor.fetchall()
+    
     cursor.close()
     return render_template('flight_purchase.html',airline=airline, flight_num=flight_num,dept_date=dept_date,dept_time=dept_time,arr_date=arr_date, arr_time=arr_time, dept_airport=dept_airport, flight_status=flight_status,id_num=id_num,price=base_price,ticket_id=ticket_id,username=username,email=email)
 
@@ -411,13 +420,18 @@ def purchase_flight():
     now=datetime.now()
     purchase_time=now.strftime("%H:%M:%S")
     
+    print(ticket_id,airline_name,flight_num,dept_date,dept_time)
     cursor=conn.cursor()
-    query_ticket='INSERT INTO ticket value(%s,%s,%s,%s,%s)'
+    
+    query_ticket='INSERT INTO ticket VALUES(%s,%s,%s,%s,%s)'
     cursor.execute(query_ticket,(ticket_id,airline_name,flight_num,dept_date,dept_time))
 
-    query_purchae='INSERT INTO purchase value(%s,%s,%s,%s,%s,%s,%s,%s,%s)'
-    cursor.execute(query_purchae,(ticket_id,email,price,card_type,card_number,name_on_card,expiration_date,purchase_date,purchase_time))
-
+    print(ticket_id,email,price,card_type,card_number,name_on_card,expiration_date,purchase_date,purchase_time)
+    
+    query_purchase='INSERT INTO purchase VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s)'
+    cursor.execute(query_purchase,(ticket_id,email,price,card_type,card_number,name_on_card,expiration_date,purchase_date,purchase_time))
+    
+    conn.commit()
     cursor.close()
     return render_template('purchase_success.html')
 
