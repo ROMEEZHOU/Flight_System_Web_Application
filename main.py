@@ -562,6 +562,8 @@ def add_flight():
 
 @app.route('/add_flight_form',methods=['GET','POST'])
 def add_flight_form():
+    if session['airline']==None or session['type']!='staff':
+        return redirect('/')
     airline_name=request.form['airline_name']
     flight_num=request.form['flight_num']
     dept_date=request.form['dept_date']
@@ -613,7 +615,40 @@ def change_flight_status():
 
 @app.route('/add_airplane',methods=['GET','POST'])
 def add_airplane():
-    pass
+    if session['airline']==None or session['type']!='staff':
+        return redirect('/')
+    airline=session['airline']
+    return render_template('add_airplane.html',airline=airline)
+
+@app.route('/add_airplane_form',methods=['GET','POST'])
+def add_airplane_form():
+    if session['airline']==None or session['type']!='staff':
+        return redirect('/')
+    airline_name=request.form['airline_name']
+    id_num=request.form['id_num']
+    seat_num=int(request.form['seat_num'])
+    manu_company=request.form['manu_company']
+    age=int(request.form['age'])
+
+    cursor=conn.cursor()
+    query1='SELECT * FROM airplane WHERE airline_name=%s AND id_num=%s'
+    cursor.execute(query1,(airline_name,id_num))
+    data1=cursor.fetchall()
+    if data1:
+        cursor.close()
+        return render_template('add_airplane.html',error='Airplane already existed')
+    in_query='INSERT INTO airplane VALUES (%s,%s,%s,%s,%s)'
+    cursor.execute(in_query,(airline_name,id_num,seat_num,manu_company,age))
+    conn.commit()
+    cursor.close()
+
+    cursor=conn.cursor()
+    query='SELECT * FROM airplane WHERE airline_name=%s'
+    cursor.execute(query,(airline_name))
+    data=cursor.fetchall()
+    cursor.close()
+    return render_template('add_airplane_success.html',data=data,airline_name=airline_name)
+    
 
 @app.route('/add_airport',methods=['GET','POST'])
 def add_airport():
