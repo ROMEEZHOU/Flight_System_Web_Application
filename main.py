@@ -274,6 +274,7 @@ def customer_login_auth():
         session['type']='customer'
         session['email']=email
         session['username'] = data['name']
+        print(session['email'])
         return redirect(url_for('customer_home_init'))
     else:
     	#returns an error message to the html page
@@ -320,8 +321,9 @@ def customer_home_init():
         return redirect('/')
     username=session['username']
     email = session['email']
+    print(email)
     cursor=conn.cursor()
-    query='SELECT airline_name, flight_num, dept_date, dept_time, arr_date, arr_time, dept_airport, arr_airport, flight_status, id_num FROM ticket NATURAL JOIN purchase NATURAL JOIN flight WHERE email=%s AND (dept_date=CURDATE() AND dept_time>=CURRENT_TIME()) OR dept_date>CURDATE()'
+    query='SELECT airline_name, flight_num, dept_date, dept_time, arr_date, arr_time, dept_airport, arr_airport, flight_status, id_num FROM ticket NATURAL JOIN purchase NATURAL JOIN flight WHERE email=%s AND ((dept_date=CURDATE() AND dept_time>=CURRENT_TIME()) OR dept_date>CURDATE())'
     cursor.execute(query,(email))
     data=cursor.fetchall()
     cursor.close()
@@ -550,6 +552,88 @@ def view_customer():
     cursor.close()
     
     return render_template('view_customer.html',airline=airline, flight_num=flight_num, username=username, post1=data)
+
+@app.route('/add_flight',methods=['GET','POST'])
+def add_flight():
+    if session['airline']==None or session['type']!='staff':
+        return redirect('/')
+    airline=session['airline']
+    return render_template('add_flight.html',airline=airline)
+
+@app.route('/add_flight_form',methods=['GET','POST'])
+def add_flight_form():
+    airline_name=request.form['airline_name']
+    flight_num=request.form['flight_num']
+    dept_date=request.form['dept_date']
+    dept_time=request.form['dept_time']
+    arr_date=request.form['arr_date']
+    arr_time=request.form['arr_time']
+    dept_airport=request.form['dept_airport']
+    arr_airport=request.form['arr_airport']
+    base_price=int(request.form['base_price'])
+    flight_status=request.form['flight_status']
+    id_num=request.form['id_num']
+
+    cursor=conn.cursor()
+    query1='SELECT * FROM flight WHERE airline_name=%s AND flight_num=%s AND dept_date=%s AND dept_time=%s'
+    cursor.execute(query1,(airline_name,flight_num,dept_date,dept_time))
+    data1=cursor.fetchall()
+    if data1:
+        cursor.close()
+        return render_template('add_flight.html',error='Flight already exists')
+    query2='SELECT * FROM airport WHERE name=%s'
+    cursor.execute(query2,(dept_airport))
+    data2=cursor.fetchall()
+    if not data2:
+        cursor.close()
+        return render_template('add_flight.html',error='Departure airport does not exist')
+    cursor.execute(query2,(arr_airport))
+    data3=cursor.fetchall()
+    if not data3:
+        cursor.close()
+        return render_template('add_flight.html',error='Arrival airport does not exist')
+    query3='SELECT * FROM airplane WHERE airline_name=%s AND id_num=%s'
+    cursor.execute(query3,(airline_name,id_num))
+    data4=cursor.fetchall()
+    if not data4:
+        cursor.close()
+        return render_template('add_flight.html',error='Airplane does not exist')
+
+    in_query='INSERT INTO flight VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'
+    cursor.execute(in_query,(airline_name,flight_num,dept_date,dept_time,arr_date,arr_time,dept_airport,arr_airport,base_price,flight_status,id_num))
+    conn.commit()
+    cursor.close()
+
+    return render_template('add_flight_success.html')
+
+
+@app.route('/change_flight_status',methods=['GET','POST'])
+def change_flight_status():
+    pass
+
+@app.route('/add_airplane',methods=['GET','POST'])
+def add_airplane():
+    pass
+
+@app.route('/add_airport',methods=['GET','POST'])
+def add_airport():
+    pass
+
+@app.route('/flight_rating',methods=['GET','POST'])
+def flight_rating():
+    pass
+
+@app.route('/frequent_customer',methods=['GET','POST'])
+def frequent_customer():
+    pass
+
+@app.route('/view_report',methods=['GET','POST'])
+def view_report():
+    pass
+
+@app.route('/view_revenue',methods=['GET','POST'])
+def view_revenue():
+    pass
 
 
 
