@@ -9,7 +9,7 @@ app=Flask(__name__,template_folder='template')
 
 #Configure MySQL
 conn = pymysql.connect(host='localhost',
-                       port=3307,
+                       port=3308,
                        user='root',
                        password='',
                        db='DB_Project',
