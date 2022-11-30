@@ -595,6 +595,7 @@ def add_flight_form():
         cursor.close()
         return render_template('add_flight.html',error='Arrival airport does not exist')
     query3='SELECT * FROM airplane WHERE airline_name=%s AND id_num=%s'
+    print(airline_name,id_num)
     cursor.execute(query3,(airline_name,id_num))
     data4=cursor.fetchall()
     if not data4:
@@ -611,7 +612,43 @@ def add_flight_form():
 
 @app.route('/change_flight_status',methods=['GET','POST'])
 def change_flight_status():
-    pass
+    if session['airline']==None or session['type']!='staff':
+        return redirect('/')
+    airline_name=session['airline']
+    username=session['username']
+    return render_template('change_flight_status.html',username=username,airline_name=airline_name)
+
+@app.route('/search_flight_change_status',methods=['GET','POST'])
+def search_flight_change_status():
+    if session['airline']==None or session['type']!='staff':
+        return redirect('/')
+    username=session['username']
+    airline_name=session['airline']
+    #airline_name=request.form['airline_name']
+    flight_num=request.form['flight_num']
+    dept_date=request.form['dept_date']
+    dept_time=request.form['dept_time']
+    cursor=conn.cursor()
+    query1='SELECT * FROM flight WHERE airline_name=%s AND flight_num=%s AND dept_date=%s AND dept_time=%s'
+    cursor.execute(query1,(airline_name,flight_num,dept_date,dept_time))
+    post1=cursor.fetchall()
+    cursor.close()
+    return render_template('change_flight_status.html',username=username,airline_name=airline_name,post1=post1)
+
+@app.route('/change_status_confirm',methods=['GET','POST'])
+def change_status_confirm():
+    airline_name=request.form['airline_name']
+    flight_num=request.form['flight_num']
+    dept_date=request.form['dept_date']
+    dept_time=request.form['dept_time']
+    new_status=request.form['status']
+    cursor=conn.cursor()
+    up_query='UPDATE flight SET flight_status=%s WHERE airline_name=%s AND flight_num=%s AND dept_date=%s AND dept_time=%s'
+    cursor.execute(up_query,(new_status,airline_name,flight_num,dept_date,dept_time))
+    conn.commit()
+    cursor.close()
+    return render_template('change_status_success.html')
+
 
 @app.route('/add_airplane',methods=['GET','POST'])
 def add_airplane():
@@ -652,7 +689,31 @@ def add_airplane_form():
 
 @app.route('/add_airport',methods=['GET','POST'])
 def add_airport():
-    pass
+    if session['airline']==None or session['type']!='staff':
+        return redirect('/')
+    return render_template('add_airport.html')
+
+@app.route('/add_airport_form',methods=['GET','POST'])
+def add_airport_form():
+    name=request.form["name"]
+    city=request.form['city']
+    country=request.form['country']
+    airport_type=request.form['type']
+    if len(name)!=3:
+        return render_template('add_airport.html',error='Please enter valid airport name')
+    cursor=conn.cursor()
+    query1='SELECT * FROM airport WHERE name=%s'
+    cursor.execute(query1,(name))
+    data1=cursor.fetchall()
+    if data1:
+        cursor.close()
+        return render_template('add_airport.html',error='Airport already existed')
+    in_query='INSERT INTO airport VALUES (%s,%s,%s,%s)'
+    cursor.execute(in_query,(name,city,country,airport_type))
+    conn.commit()
+    cursor.close()
+    return render_template('add_airport_success.html')
+
 
 @app.route('/flight_rating',methods=['GET','POST'])
 def flight_rating():
@@ -678,11 +739,12 @@ def view_revenue():
 
 @app.route('/log_out')
 def log_out():
+    username=session['username']
     session['type']=None
     session['username']=None
     session['email']=None
     session['airline']=None
-    return redirect('/')
+    return render_template('goodbye.html',username=username)
 
 def generate_random_str(randomlength=29):
     random_str =''

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+</head>
+
+<style type="text/css">
+	.navigation {
+  		display: flex;
+  		flex-flow: row wrap;
+  		justify-content: flex-end;
+  
+  		list-style: none;
+  		margin: 0; 
+  		background: #6598d3;
+	}
+
+	.navigation a {
+  		text-decoration: none;
+  		display: block;
+  		padding: 1em;
+  		color: white;
+	}
+
+	.navigation a:hover {
+  		background: #1565C0;
+	}
+
+    .navigation2 {
+  		display: flex;
+  		flex-flow: row wrap;
+  		justify-content: flex-start;
+  
+  		list-style: none;
+  		margin: 0; 
+  		background: #6598d3;
+	}
+
+	.navigation2 a {
+  		text-decoration: none;
+  		display: block;
+  		padding: 1em;
+  		color: white;
+	}
+
+	.navigation2 a:hover {
+  		background: #1565C0;
+	}
+	
+	h1 {
+        color: #1565C0;
+        font-family: arial;
+    }
+
+	h2 {
+        color: #1565C0;
+        font-family: arial;
+    }
+
+	#post_button {
+        float: left;
+        background-color: #1565C0;
+        border: none;
+        color: white;
+        padding: 4px;
+        font-size: 14px;
+        border-radius: 2px;
+	}
+    #post_button:hover {
+        background-color: #6598d3;
+	}
+
+	.table11_7 table {
+        width:100%;
+        margin:15px 0;
+        border:0;
+    }
+    .table11_7 th {
+        background-color:#6598d3;
+        color:#FFFFFF
+    }
+    .table11_7,.table11_7 th,.table11_7 td {
+        font-size:0.95em;
+        text-align:center;
+        padding:4px;
+        border-collapse:collapse;
+    }
+    .table11_7 th,.table11_7 td {
+        border: 1px solid #6598d3;
+        border-width:1px 0 1px 0;
+        border:2px inset #ffffff;
+    }
+    .table11_7 tr {
+        border: 1px solid #b1c9e4;
+    }
+    .table11_7 tr:nth-child(odd){
+        background-color:#b1c9e4;
+    }
+    .table11_7 tr:nth-child(even){
+        background-color:#ffffff;
+    }
+
+
+
+</style>
+
+<body>
+    <div>
+        
+		<ul class="navigation">
+			<li><a href="/log_out">Log Out </a></li>
+		</ul>
+	</div>
+
+    <form action="/post" method="POST">
+        <h1>Welcome {{username}} !</h1>
+        <h1>Welcome to Romee's Flight Booking System！</h1>
+    </form>
+
+    <div style="min-height: 70px; flex: 1;">
+		<form action="/search_flight_change_status" method="POST">
+			<div style="display: table;">
+				<div style="display: table-cell;">
+					Airline: <input type="hidden" name = "airline_name" value="{{airline_name}}" required/>{{airline_name}} </br>
+				</div>
+				&nbsp;
+				&nbsp;
+				<div style="display: table-cell;">
+					Flight Number: <input type="text" name = "flight_num" placeholder="flight number" required/> </br>
+				</div>
+				&nbsp;
+				&nbsp;
+				<div style="display: table-cell;">
+					Departure Date: <input type="date" name = "dept_date" placeholder="dept_date" required/> </br>
+				</div>
+				&nbsp;
+				&nbsp;
+				<div style="display: table-cell;">
+					Departure Time: <input type="time" name = "dept_time"/> </br>
+				</div>
+			</div>
+			<input id="post_button" type="submit" value="Search Flight" />
+			{% if error1 %}
+            	<p class="error"><strong>Error:</strong> {{error1}}</p>
+        	{% endif %}
+			
+		</form>
+	</div>
+
+    {% if not post1 %}
+    <h2>No flight selected</h2>
+    {% endif %}
+
+	{% if post1 %}
+	<div>
+		<h2>Departure Flight</h2>
+		<table class=table11_7>
+			<th>Airline</th>
+			<th>Flight Number</th>
+			<th>Departure Date</th>
+			<th>Departure Time</th>
+			<th>Arrival Date</th>
+			<th>Arrivel Time</th>
+			<th>From</th>
+			<th>To</th>
+			<th>Price(B)</th>
+			<th>Status</th>
+			<th>Airplane</th>
+            <th>Confirm Change</th>
+		
+		{% for line in post1 %}
+            <form action="/change_status_confirm" method="POST">
+			    <tr>
+				    <td><input type="hidden" name="airline_name" value="{{line['airline_name']}}">{{line['airline_name']}}</td>
+				    <td><input type="hidden" name="flight_num" value="{{line['flight_num']}}">{{line['flight_num']}}</td>
+				    <td><input type="hidden" name="dept_date" value="{{line['dept_date']}}">{{line['dept_date']}}</td>
+				    <td><input type="hidden" name="dept_time" value="{{line['dept_time']}}">{{line['dept_time']}}</td>
+				    <td><input type="hidden" name="arr_date" value="{{line['arr_date']}}">{{line['arr_date']}}</td>
+				    <td><input type="hidden" name="arr_time" value="{{line['arr_time']}}">{{line['arr_time']}}</td>
+				    <td><input type="hidden" name="dept_airport" value="{{line['dept_airport']}}">{{line['dept_airport']}}</td>
+				    <td><input type="hidden" name="arr_airport" value="{{line['arr_airport']}}">{{line['arr_airport']}}</td>
+				    <td><input type="hidden" name="base_price" value="{{line['base_price']}}">{{line['base_price']}}</td>
+				    <td><select name="status">
+                        <option value="on time">on time</option>
+                        <option value="delayed">delayed</option>
+                        <option value="cancelled">cancelled</option>
+                    </select> </br></td>
+				    <td><input type="hidden" name="id_num" value="{{line['id_num']}}">{{line['id_num']}}</td>
+                    <td><input id="post_button" type="submit" value="Change Status" /></td>				
+			    </tr>
+            </form>
+		{% endfor %}
+		</table>
+	</div>
+	{% endif %}
+    
+    <div class="navigation2">
+        <a href="/staff_home">Go back</a>
+    </div>
+</body>
+
+</html>

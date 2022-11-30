@@ -1,0 +1,102 @@
+<html>
+<head>
+</head>
+
+<style>
+    .parent {
+        border: 6px solid #1565C0;
+        margin: 1rem;
+        padding: 2rem 2rem;
+        text-align: center;
+    }
+    .child {
+        display: inline-block;
+        padding: 1rem 1rem;
+        vertical-align: middle;
+    }
+
+    #post_button {
+        float: center;
+        width: 400px;
+        margin-top: 20px;
+        background-color: #1565C0;
+        border: none;
+        color: white;
+        padding: 4px;
+        font-size: 14px;
+        border-radius: 2px;
+	}
+
+    #post_bar {
+        width:400px;
+        margin-top: 20px;
+        background-color: white;
+        padding: 10px;
+    }
+    #post_button:hover {
+        background-color: #6598d3;
+	}
+
+    .navigation {
+  		display: flex;
+  		flex-flow: row wrap;
+  		justify-content: flex-end;
+  
+  		list-style: none;
+  		margin: 0; 
+  		background: #6598d3;
+	}
+
+	.navigation a {
+  		text-decoration: none;
+  		display: block;
+  		padding: 1em;
+  		color: white;
+	}
+
+	.navigation a:hover {
+  		background: #1565C0;
+	}
+
+    a {
+  		text-decoration: none;
+        background-color: #6598d3;
+  		display: block;
+  		padding: 1em;
+  		color: white;
+	}
+
+	a:hover {
+  		background: #1565C0;
+	}
+</style>
+<body>
+<div>
+        
+	<ul class="navigation">
+		<li><a href="/log_out">Log Out </a></li>
+	</ul>
+</div>
+<div class="parent";>
+    <form action="/add_airport_form" method="POST">
+        Name: <input id="post_bar" type="text" name = "name" placeholder="name" required/> </br>
+        City: <input id="post_bar" type="text" name = "city" placeholder="city" required/> </br>
+        Country: <input id="post_bar" type="text" name = "country" required/> </br>
+        </br>
+        Type: <select name="type">
+            <option value="domestic">domestic</option>
+            <option value="international">international</option>
+            <option value="both">both</option>
+        </select> </br>
+
+        <input id="post_button" type="submit" value= 'Add Airport' />
+
+        {% if error %}
+            <p class="error"><strong>Error:</strong> {{error}}</p>
+        {% endif %}
+    </form>
+</div>
+
+<a href="/staff_home">Go back</a>
+
+</body>
