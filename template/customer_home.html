@@ -195,7 +195,7 @@
 			<th>Arrivel Time</th>
 			<th>From</th>
 			<th>To</th>
-			<th>Price(B)</th>
+			<th>Price</th>
 			<th>Status</th>
 			<th>Airplane</th>
             <th>Book Here</th>
@@ -211,10 +211,10 @@
 				    <td><input type="hidden" name="arr_time" value="{{line['arr_time']}}">{{line['arr_time']}}</td>
 				    <td><input type="hidden" name="dept_airport" value="{{line['dept_airport']}}">{{line['dept_airport']}}</td>
 				    <td><input type="hidden" name="arr_airport" value="{{line['arr_airport']}}">{{line['arr_airport']}}</td>
-				    <td><input type="hidden" name="base_price" value="{{line['base_price']}}">{{line['base_price']}}</td>
+				    <td><input type="hidden" name="sold_price" value="{{line['sold_price']}}">{{line['sold_price']}}</td>
 				    <td><input type="hidden" name="flight_status" value="{{line['flight_status']}}">{{line['flight_status']}}</td>
 				    <td><input type="hidden" name="id_num" value="{{line['id_num']}}">{{line['id_num']}}</td>
-                    <td><input id="post_button" type="submit" value="Book" /></td>				
+                    <td><input id="post_button" type="submit" value="Book" /></td>
 			    </tr>
             </form>
 		{% endfor %}
