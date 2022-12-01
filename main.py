@@ -323,11 +323,39 @@ def customer_home_init():
     email = session['email']
     print(email)
     cursor=conn.cursor()
-    query='SELECT airline_name, flight_num, dept_date, dept_time, arr_date, arr_time, dept_airport, arr_airport, flight_status, id_num FROM ticket NATURAL JOIN purchase NATURAL JOIN flight WHERE email=%s AND ((dept_date=CURDATE() AND dept_time>=CURRENT_TIME()) OR dept_date>CURDATE())'
+    query='SELECT ticket_id, airline_name, flight_num, dept_date, dept_time, arr_date, arr_time, dept_airport, arr_airport, flight_status, id_num FROM ticket NATURAL JOIN purchase NATURAL JOIN flight WHERE email=%s AND ((dept_date=CURDATE() AND dept_time>=CURRENT_TIME()) OR dept_date>CURDATE())'
     cursor.execute(query,(email))
     data=cursor.fetchall()
     cursor.close()
     return render_template('customer_home_init.html',username=username,post1=data)
+
+@app.route('/customer_cancel_flight',methods=['GET','POST'])
+def customer_cancel_flight():
+    ticket_id=request.form['ticket_id']
+    airline_name=request.form['airline_name']
+    flight_num=request.form['flight_num']
+    dept_date=request.form['dept_date']
+    dept_time=request.form['dept_time']
+    return render_template('customer_cancel_confirmation.html',ticket_id=ticket_id,airline_name=airline_name,flight_num=flight_num,dept_date=dept_date,dept_time=dept_time)
+
+@app.route('/customer_cancel_confirmation',methods=['GET','POST'])
+def customer_cancel_confirmation():
+    ticket_id=request.form['ticket_id']
+    airline_name=request.form['airline_name']
+    flight_num=request.form['flight_num']
+    dept_date=request.form['dept_date']
+    dept_time=request.form['dept_time']
+
+    cursor=conn.cursor()
+    query1='DELETE FROM ticket WHERE ticket_id=%s'
+    query2='DELETE FROM purchase WHERE ticket_id=%s'
+    cursor.execute(query2,(ticket_id))
+    cursor.execute(query1,(ticket_id))
+    conn.commit()
+    cursor.close()
+
+    return render_template('customer_cancel_success.html')
+    
 
 
 

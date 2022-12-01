@@ -132,31 +132,14 @@
     </form>
 
     <div class="parent";>
-        <form action="/purchase_flight" method="POST">
-            Airline: <input type="hidden" name="airline_name" value="{{airline}}"> {{airline}} </br>
+        <form action="/customer_cancel_confirmation" method="POST">
+            Ticket ID: <input type="hidden" name="ticket_id" value="{{ticket_id}}"> {{ticket_id}} </br>
+            Airline: <input type="hidden" name="airline_name" value="{{airline_name}}"> {{airline_name}} </br>
             Flight_num: <input type="hidden" name="flight_num" value="{{flight_num}}"> {{flight_num}} </br>
             Departure Date: <input type="hidden" name="dept_date" value="{{dept_date}}"> {{dept_date}} </br>
             Departure Time: <input type="hidden" name="dept_time" value="{{dept_time}}"> {{dept_time}} </br>
-            Arrival Date: <input type="hidden" name="arr_date" value="{{arr_date}}"> {{arr_date}} </br>
-            Arrival Time: <input type="hidden" name="arr_time" value="{{arr_time}}"> {{arr_time}} </br>
-            Departure Airport: <input type="hidden" name="dept_airport" value="{{dept_airport}}"> {{dept_airport}} </br>
-            Arrival Airport: <input type="hidden" name="arr_airport" value="{{arr_airport}}"> {{arr_airport}} </br>
-            Price: <input type="hidden" name="sold_price" value="{{sold_price}}"> {{sold_price}} </br>
-            Flight Status: <input type="hidden" name="flight_status" value="{{flight_status}}"> {{flight_status}} </br>
-            Airplane Id: <input type="hidden" name="id_num" value="{{id_num}}"> {{id_num}} </br>
-            Ticket id: <input type="hidden" name="ticket_id" value="{{ticket_id}}"> {{ticket_id}} </br>
-            </br>
-            Email: <input type="hidden" name="email" value="{{email}}"> {{email}} </br>
-            Name: <input type="hidden" name="name" value="{{username}}">{{username}} </br>
-            Card Type: <select name="card_type">
-                <option value="credit">credit</option>
-                <option value="debit">debit</option>
-            </select> </br>
-            Card Number: <input id="post_bar" type="text" name = "card_number" placeholder="card number" required/> </br>
-            Name on Card: <input id="post_bar" type="text" name = "name_on_card" placeholder="name on card" required/> </br>
-            Expiration Date: <input id="post_bar" type="date" name = "expiration_date" required/> </br>
             
-            <input id="post_button" type="submit" value= 'Comfirm Purchase' />
+            <input id="post_button" type="submit" value= 'Confirm Cancel' />
             {% if error %}
                 <p class="error"><strong>Error:</strong> {{error}}</p>
             {% endif %}

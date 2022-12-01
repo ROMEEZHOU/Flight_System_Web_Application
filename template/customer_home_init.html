@@ -155,6 +155,7 @@
 	<div>
 		<h2>Your Future Flights</h2>
 		<table class=table11_7>
+            <th>Ticket ID</th>
 			<th>Airline</th>
 			<th>Flight Number</th>
 			<th>Departure Date</th>
@@ -170,6 +171,7 @@
             {% for line in post1 %}
             <form action="/customer_cancel_flight" method="POST">
                 <tr>
+                <td><input type="hidden" name="ticket_id" value="{{line['ticket_id']}}">{{line['ticket_id']}}</td>
 				<td><input type="hidden" name="airline_name" value="{{line['airline_name']}}">{{line['airline_name']}}</td>
 				<td><input type="hidden" name="flight_num" value="{{line['flight_num']}}">{{line['flight_num']}}</td>
 				<td><input type="hidden" name="dept_date" value="{{line['dept_date']}}">{{line['dept_date']}}</td>
