@@ -154,7 +154,7 @@
 	</div>
 
 	<div style="min-height: 70px; flex: 1;">
-		<form action="/SearchFlightStatus" method="POST">
+		<form action="/customer_search_flight_status" method="POST">
 			<div style="display: table;">
 				<div style="display: table-cell;">
 					Airline: <input type="text" name = "airline" placeholder="airline name" required/> </br>
@@ -185,7 +185,7 @@
 
 	{% if post1 %}
 	<div>
-		<h2>Departure Flight</h2>
+		<h2>Departure Flight (Only flights that are still available)</h2>
 		<table class=table11_7>
 			<th>Airline</th>
 			<th>Flight Number</th>
@@ -224,7 +224,7 @@
 
 	{% if post2 %}
 	<div>
-		<h2>Return Flight</h2>
+		<h2>Return Flight (Only flights that are still available)</h2>
 		<table class=table11_7>
 			<th>Airline</th>
 			<th>Flight Number</th>
@@ -234,24 +234,28 @@
 			<th>Arrivel Time</th>
 			<th>From</th>
 			<th>To</th>
-			<th>Price(B)</th>
+			<th>Price</th>
 			<th>Status</th>
 			<th>Airplane</th>
+            <th>Book Here</th>
 		
 		{% for line in post2 %}
-			<tr>
-				<td>{{line['airline_name']}}</td>
-				<td>{{line['flight_num']}}</td>
-				<td>{{line['dept_date']}}</td>
-				<td>{{line['dept_time']}}</td>
-				<td>{{line['arr_date']}}</td>
-				<td>{{line['arr_time']}}</td>
-				<td>{{line['dept_airport']}}</td>
-				<td>{{line['arr_airport']}}</td>
-				<td>{{line['base_price']}}</td>
-				<td>{{line['flight_status']}}</td>
-				<td>{{line['id_num']}}</td>
-			</tr>
+            <form action="/book_flight" method="POST">
+			    <tr>
+				    <td><input type="hidden" name="airline_name" value="{{line['airline_name']}}">{{line['airline_name']}}</td>
+				    <td><input type="hidden" name="flight_num" value="{{line['flight_num']}}">{{line['flight_num']}}</td>
+				    <td><input type="hidden" name="dept_date" value="{{line['dept_date']}}">{{line['dept_date']}}</td>
+				    <td><input type="hidden" name="dept_time" value="{{line['dept_time']}}">{{line['dept_time']}}</td>
+				    <td><input type="hidden" name="arr_date" value="{{line['arr_date']}}">{{line['arr_date']}}</td>
+				    <td><input type="hidden" name="arr_time" value="{{line['arr_time']}}">{{line['arr_time']}}</td>
+				    <td><input type="hidden" name="dept_airport" value="{{line['dept_airport']}}">{{line['dept_airport']}}</td>
+				    <td><input type="hidden" name="arr_airport" value="{{line['arr_airport']}}">{{line['arr_airport']}}</td>
+				    <td><input type="hidden" name="sold_price" value="{{line['sold_price']}}">{{line['sold_price']}}</td>
+				    <td><input type="hidden" name="flight_status" value="{{line['flight_status']}}">{{line['flight_status']}}</td>
+				    <td><input type="hidden" name="id_num" value="{{line['id_num']}}">{{line['id_num']}}</td>
+                    <td><input id="post_button" type="submit" value="Book" /></td>
+			    </tr>
+            </form>
 		{% endfor %}
 		</table>
 	</div>

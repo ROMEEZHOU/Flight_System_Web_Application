@@ -323,7 +323,7 @@ def customer_home_init():
     email = session['email']
     print(email)
     cursor=conn.cursor()
-    query='SELECT ticket_id, airline_name, flight_num, dept_date, dept_time, arr_date, arr_time, dept_airport, arr_airport, flight_status, id_num FROM ticket NATURAL JOIN purchase NATURAL JOIN flight WHERE email=%s AND ((dept_date=CURDATE() AND dept_time>=CURRENT_TIME()) OR dept_date>CURDATE())'
+    query='SELECT ticket_id, airline_name, flight_num, dept_date, dept_time, arr_date, arr_time, dept_airport, arr_airport, flight_status, id_num, sold_price FROM ticket NATURAL JOIN purchase NATURAL JOIN flight WHERE email=%s AND ((dept_date=CURDATE() AND dept_time>=CURRENT_TIME()) OR dept_date>CURDATE())'
     cursor.execute(query,(email))
     data=cursor.fetchall()
     cursor.close()
@@ -383,12 +383,38 @@ def customer_search_flight():
             if return_date_obj<dept_date_obj:
                 return render_template('customer_home.html',error1='Please select valid departure date and return date')
             cursor=conn.cursor()
-            query1='(SELECT * FROM flight WHERE dept_airport= %s AND arr_airport= %s AND dept_date = %s) UNION (SELECT * FROM flight WHERE dept_airport= %s AND dept_date= %s AND arr_airport IN (SELECT name FROM airport WHERE city= %s)) UNION (SELECT * FROM flight WHERE arr_airport= %s AND dept_date= %s AND dept_airport IN (SELECT name FROM airport WHERE city= %s)) UNION (SELECT * FROM flight WHERE dept_date= %s AND dept_airport IN (SELECT name FROM airport WHERE city= %s) AND arr_airport IN (SELECT name FROM airport WHERE city = %s))'
-            cursor.execute(query1, (departure, destination, dept_date, departure, dept_date, destination, destination, dept_date, departure, dept_date, departure, destination))
+            view_query3='CREATE OR REPLACE VIEW temp_flight1 AS (SELECT * FROM flight WHERE dept_airport= %s AND arr_airport= %s AND dept_date = %s) UNION (SELECT * FROM flight WHERE dept_airport= %s AND dept_date= %s AND arr_airport IN (SELECT name FROM airport WHERE city= %s)) UNION (SELECT * FROM flight WHERE arr_airport= %s AND dept_date= %s AND dept_airport IN (SELECT name FROM airport WHERE city= %s)) UNION (SELECT * FROM flight WHERE dept_date= %s AND dept_airport IN (SELECT name FROM airport WHERE city= %s) AND arr_airport IN (SELECT name FROM airport WHERE city = %s))'
+            
+            '''
+            query1='(SELECT * FROM flight WHERE dept_airport= %s AND arr_airport= %s AND dept_date = %s) UNION (SELECT * FROM flight WHERE dept_airport= %s AND dept_date= %s AND arr_airport IN (SELECT name FROM airport WHERE city= %s)) UNION (SELECT * FROM flight WHERE arr_airport= %s AND dept_date= %s AND dept_airport IN (SELECT name FROM airport WHERE city= %s)) UNION (SELECT * FROM flight WHERE dept_date= %s AND dept_airport IN (SELECT name FROM airport WHERE city= %s) AND arr_airport IN (SELECT name FROM airport WHERE city = %s))' '''
+
+            view_query1='CREATE OR REPLACE VIEW cus_count AS (SELECT airline_name,flight_num,dept_date,dept_time,COUNT(ticket_id) AS cus_num FROM ticket GROUP BY airline_name,flight_num,dept_date,dept_time)'
+
+            cursor.execute(view_query1)
+            conn.commit()
+
+            cursor.execute(view_query3, (departure, destination, dept_date, departure, dept_date, destination, destination, dept_date, departure, dept_date, departure, destination))
+            conn.commit()
+
+            query_dept='(SELECT airline_name,flight_num,dept_date,dept_time,arr_date,arr_time, dept_airport, arr_airport, IF(cus_num>seat_num*0.6,base_price*1.25, base_price) AS sold_price, flight_status,id_num FROM cus_count NATURAL JOIN temp_flight1 NATURAL JOIN airplane WHERE cus_num<seat_num) UNION\
+                (SELECT airline_name,flight_num,dept_date,dept_time,arr_date,arr_time, dept_airport, arr_airport, base_price AS sold_price, flight_status,id_num FROM temp_flight1 WHERE NOT EXISTS (SELECT * FROM cus_count AS C WHERE C.airline_name=temp_flight1.airline_name AND C.flight_num=temp_flight1.flight_num AND C.dept_date=temp_flight1.dept_date AND C.dept_time=temp_flight1.dept_time))'
+
+            cursor.execute(query_dept)
             data1=cursor.fetchall()
 
-            query2='(SELECT * FROM flight WHERE dept_airport= %s AND arr_airport= %s AND dept_date = %s) UNION (SELECT * FROM flight WHERE dept_airport= %s AND dept_date= %s AND arr_airport IN (SELECT name FROM airport WHERE city= %s)) UNION (SELECT * FROM flight WHERE arr_airport= %s AND dept_date= %s AND dept_airport IN (SELECT name FROM airport WHERE city= %s)) UNION (SELECT * FROM flight WHERE dept_date= %s AND dept_airport IN (SELECT name FROM airport WHERE city= %s) AND arr_airport IN (SELECT name FROM airport WHERE city = %s))'
-            cursor.execute(query1, (destination, departure, return_date, destination, return_date, departure, departure, return_date, destination, return_date, destination, departure))
+            view_query4='CREATE OR REPLACE VIEW temp_flight2 AS (SELECT * FROM flight WHERE dept_airport= %s AND arr_airport= %s AND dept_date = %s) UNION (SELECT * FROM flight WHERE dept_airport= %s AND dept_date= %s AND arr_airport IN (SELECT name FROM airport WHERE city= %s)) UNION (SELECT * FROM flight WHERE arr_airport= %s AND dept_date= %s AND dept_airport IN (SELECT name FROM airport WHERE city= %s)) UNION (SELECT * FROM flight WHERE dept_date= %s AND dept_airport IN (SELECT name FROM airport WHERE city= %s) AND arr_airport IN (SELECT name FROM airport WHERE city = %s))'
+
+            '''
+            query2='(SELECT * FROM flight WHERE dept_airport= %s AND arr_airport= %s AND dept_date = %s) UNION (SELECT * FROM flight WHERE dept_airport= %s AND dept_date= %s AND arr_airport IN (SELECT name FROM airport WHERE city= %s)) UNION (SELECT * FROM flight WHERE arr_airport= %s AND dept_date= %s AND dept_airport IN (SELECT name FROM airport WHERE city= %s)) UNION (SELECT * FROM flight WHERE dept_date= %s AND dept_airport IN (SELECT name FROM airport WHERE city= %s) AND arr_airport IN (SELECT name FROM airport WHERE city = %s))' '''
+
+            cursor.execute(view_query4, (destination, departure, return_date, destination, return_date, departure, departure, return_date, destination, return_date, destination, departure))
+            conn.commit()
+
+            query_re='(SELECT airline_name,flight_num,dept_date,dept_time,arr_date,arr_time, dept_airport, arr_airport, IF(cus_num>seat_num*0.6,base_price*1.25, base_price) AS sold_price, flight_status,id_num FROM cus_count NATURAL JOIN temp_flight2 NATURAL JOIN airplane WHERE cus_num<seat_num) UNION\
+                (SELECT airline_name,flight_num,dept_date,dept_time,arr_date,arr_time, dept_airport, arr_airport, base_price AS sold_price, flight_status,id_num FROM temp_flight2 WHERE NOT EXISTS (SELECT * FROM cus_count AS C WHERE C.airline_name=temp_flight2.airline_name AND C.flight_num=temp_flight2.flight_num AND C.dept_date=temp_flight2.dept_date AND C.dept_time=temp_flight2.dept_time))'
+
+            cursor.execute(query_re)
+
             data2=cursor.fetchall()
             cursor.close()
 
@@ -406,16 +432,6 @@ def customer_search_flight():
         cursor.execute(view_query1)
         conn.commit()
 
-        '''
-        query='(SELECT airline_name,flight_num,dept_date,dept_time,arr_date,arr_time,dept_airport,arr_airport, IF(cus_num>seat_num*0.6,base_price*1.25, base_price) AS sold_price, flight_status,id_num FROM cus_count NATURAL JOIN flight NATURAL JOIN airplane WHERE cus_num<seat_num AND dept_airport= %s AND arr_airport= %s AND dept_date = %s) \
-             UNION (SELECT airline_name,flight_num,dept_date,dept_time,arr_date,arr_time,dept_airport,arr_airport, IF(cus_num>seat_num*0.6,base_price*1.25, base_price) AS sold_price, flight_status,id_num FROM cus_count NATURAL JOIN flight NATURAL JOIN airplane WHERE cus_num<seat_num AND dept_airport= %s AND dept_date= %s AND arr_airport IN (SELECT name FROM airport WHERE city= %s)) \
-                UNION (SELECT airline_name,flight_num,dept_date,dept_time,arr_date,arr_time,dept_airport,arr_airport, IF(cus_num>seat_num*0.6,base_price*1.25, base_price) AS sold_price, flight_status,id_num FROM cus_count NATURAL JOIN flight NATURAL JOIN airplane WHERE cus_num<seat_num AND arr_airport= %s AND dept_date= %s AND dept_airport IN (SELECT name FROM airport WHERE city= %s)) \
-                     UNION (SELECT airline_name,flight_num,dept_date,dept_time,arr_date,arr_time,dept_airport,arr_airport, IF(cus_num>seat_num*0.6,base_price*1.25, base_price) AS sold_price, flight_status,id_num FROM cus_count NATURAL JOIN flight NATURAL JOIN airplane WHERE cus_num<seat_num AND dept_date= %s AND dept_airport IN (SELECT name FROM airport WHERE city= %s) AND arr_airport IN (SELECT name FROM airport WHERE city = %s)) \
-                        UNION (SELECT airline_name,flight_num,dept_date,dept_time,arr_date,arr_time,dept_airport,arr_airport, base_price AS sold_price FROM flight WHERE NOT EXISTS (SELECT * FROM cus_count AS C WHERE C.airline_name=airline_name AND C.flight_num=flight_num AND C.dept_date=dept_date AND C.dept_time=dept_time) AND dept_airport= %s AND arr_airport= %s AND dept_date = %s) \
-                             UNION (SELECT airline_name,flight_num,dept_date,dept_time,arr_date,arr_time,dept_airport,arr_airport, base_price AS sold_price FROM flight WHERE NOT EXISTS (SELECT * FROM cus_count AS C WHERE C.airline_name=airline_name AND C.flight_num=flight_num AND C.dept_date=dept_date AND C.dept_time=dept_time) AND dept_airport= %s AND dept_date= %s AND arr_airport IN (SELECT name FROM airport WHERE city= %s)) \
-                                UNION (SELECT airline_name,flight_num,dept_date,dept_time,arr_date,arr_time,dept_airport,arr_airport, base_price AS sold_price FROM flight WHERE NOT EXISTS (SELECT * FROM cus_count AS C WHERE C.airline_name=airline_name AND C.flight_num=flight_num AND C.dept_date=dept_date AND C.dept_time=dept_time) AND arr_airport= %s AND dept_date= %s AND dept_airport IN (SELECT name FROM airport WHERE city= %s)) \
-                                    UNION (SELECT airline_name,flight_num,dept_date,dept_time,arr_date,arr_time,dept_airport,arr_airport, base_price AS sold_price FROM flight WHERE NOT EXISTS (SELECT * FROM cus_count AS C WHERE C.airline_name=airline_name AND C.flight_num=flight_num AND C.dept_date=dept_date AND C.dept_time=dept_time) AND dept_date= %s AND dept_airport IN (SELECT name FROM airport WHERE city= %s) AND arr_airport IN (SELECT name FROM airport WHERE city = %s))' 
-        '''
 
         cursor.execute(view_query2, (departure, destination, dept_date, departure, dept_date, destination, destination, dept_date, departure, dept_date, departure, destination))
         conn.commit()
@@ -426,6 +442,40 @@ def customer_search_flight():
         data=cursor.fetchall()
         cursor.close()
         return render_template('customer_home.html',post1=data)
+
+@app.route('/customer_search_flight_status',methods=['GET','POST'])
+def customer_search_flight_status():
+    airline= request.form['airline']
+    flight_num=request.form['flight_num']
+    dept_date=request.form['dept_date']
+    arr_date=request.form['arr_date']
+
+    if dept_date=='':
+        if arr_date=='':
+            return render_template('index.html',error2='Please enter either departure date or arrival date')
+        else:
+            cursor=conn.cursor()
+            query='SELECT * FROM flight WHERE airline_name= %s AND flight_num = %s AND arr_date= %s'
+            cursor.execute(query, (airline, flight_num, arr_date))
+            data=cursor.fetchall()
+            cursor.close()
+            return render_template('index.html',post3=data)
+    else:
+        if arr_date=='':
+            cursor=conn.cursor()
+            query='SELECT * FROM flight WHERE airline_name= %s AND flight_num = %s AND dept_date= %s'
+            cursor.execute(query, (airline, flight_num, dept_date))
+            data=cursor.fetchall()
+            cursor.close()
+            return render_template('index.html',post3=data)
+
+        else:
+            cursor=conn.cursor()
+            query='SELECT * FROM flight WHERE airline_name= %s AND flight_num = %s AND dept_date= %s AND arr_date = %s'
+            cursor.execute(query, (airline, flight_num, dept_date, arr_date))
+            data=cursor.fetchall()
+            cursor.close()
+            return render_template('customer_home.html',post3=data)
 
 
 @app.route('/book_flight',methods=['GET', 'POST'])
@@ -491,6 +541,91 @@ def purchase_flight():
     conn.commit()
     cursor.close()
     return render_template('purchase_success.html')
+
+@app.route('/customer_previous',methods=['GET','POST'])
+def customer_previous():
+    email=session['email']
+    username=session['username']
+
+    cursor=conn.cursor()
+    query='SELECT ticket_id,airline_name,flight_num,dept_date,dept_time,arr_date,arr_time,dept_airport,arr_airport,sold_price,flight_status,id_num FROM flight NATURAL JOIN ticket NATURAL JOIN purchase WHERE email=%s AND ((dept_date=CURDATE() AND dept_time<CURRENT_TIME()) OR dept_date<CURDATE())'
+
+    cursor.execute(query,(email))
+    data=cursor.fetchall()
+    cursor.close()
+    return render_template('customer_previous_flight.html',post1=data,username=username)
+
+@app.route('/rate_and_comment',methods=['GET','POST'])
+def rate_and_comment():
+    ticket_id=request.form['ticket_id']
+    airline_name=request.form['airline_name']
+    flight_num=request.form['flight_num']
+    dept_date=request.form['dept_date']
+    dept_time=request.form['dept_time']
+    email=session['email']
+    username=session['username']
+
+    arr_date=request.form['arr_date']
+    arr_time=request.form['arr_time']
+    dept_airprot=request.form['dept_airport']
+    arr_airport=request.form['arr_airport']
+    sold_price=request.form['sold_price']
+    flight_status=request.form['flight_status']
+    id_num=request.form['id_num']
+
+    cursor=conn.cursor()
+
+    query_pre='SELECT rate,cus_comment FROM previous_flight WHERE email=%s AND ticket_id=%s AND airline_name=%s AND flight_num=%s AND dept_date=%s AND dept_time=%s'
+    cursor.execute(query_pre,(email,ticket_id,airline_name,flight_num,dept_date,dept_time))
+    data=cursor.fetchone()
+    cursor.close()
+    if data:
+        pre_rate=data['rate']
+        pre_comment=data['cus_comment']
+        return render_template('rate_and_comment.html',ticket_id=ticket_id,airline_name=airline_name,flight_num=flight_num,dept_date=dept_date,dept_time=dept_time,arr_date=arr_date,arr_time=arr_time,dept_airprot=dept_airprot,arr_airport=arr_airport,sold_price=sold_price,flight_status=flight_status,id_num=id_num,username=username,pre_rate=pre_rate,pre_comment=pre_comment)
+    else:
+        return render_template('rate_and_comment.html',ticket_id=ticket_id,airline_name=airline_name,flight_num=flight_num,dept_date=dept_date,dept_time=dept_time,arr_date=arr_date,arr_time=arr_time,dept_airprot=dept_airprot,arr_airport=arr_airport,sold_price=sold_price,flight_status=flight_status,id_num=id_num,username=username)
+
+@app.route('/rate_and_comment_form',methods=['GET','POST'])
+def rate_and_comment_form():
+    ticket_id=request.form['ticket_id']
+    airline_name=request.form['airline_name']
+    flight_num=request.form['flight_num']
+    dept_date=request.form['dept_date']
+    dept_time=request.form['dept_time']
+    email=session['email']
+    new_rate=int(request.form['rate'])
+    new_comment=request.form['comment']
+
+    cursor=conn.cursor()
+
+    query_pre='SELECT rate,cus_comment FROM previous_flight WHERE email=%s AND ticket_id=%s AND airline_name=%s AND flight_num=%s AND dept_date=%s AND dept_time=%s'
+    cursor.execute(query_pre,(email,ticket_id,airline_name,flight_num,dept_date,dept_time))
+    data=cursor.fetchone()
+    cursor.close()
+
+    if data:
+        cursor=conn.cursor()
+        up_query='UPDATE previous_flight SET cus_comment=%s, rate=%s WHERE ticket_id=%s AND email=%s AND airline_name=%s AND flight_num=%s AND dept_date=%s AND dept_time=%s'
+        cursor.execute(up_query,(new_comment,new_rate,ticket_id,email,airline_name,flight_num,dept_date,dept_time))
+        conn.commit()
+        cursor.close()
+        return render_template('rate_success.html')
+
+    else:
+        cursor=conn.cursor()
+        print(ticket_id,email,airline_name,flight_num,dept_date,dept_time,new_comment,new_rate)
+        in_query='INSERT INTO previous_flight VALUES (%s,%s,%s,%s,%s,%s,%s,%s)'
+        cursor.execute(in_query,(ticket_id,email,airline_name,flight_num,dept_date,dept_time,new_comment,new_rate))
+        conn.commit()
+        cursor.close()
+        return render_template('rate_success.html')
+
+
+
+
+
+
 
 ###############################################################################
 ###############################################################################

@@ -135,7 +135,7 @@
 
     <div class="parent">
         <div class="child">
-            <a href="/customer_home">Search for Flights</a>
+            <a href="/customer_home">Search and Book Flights</a>
         </div>
         <div class="child">
             <a href="/customer_previous">View Previous Flights</a>
@@ -154,6 +154,9 @@
 	{% if post1 %}
 	<div>
 		<h2>Your Future Flights</h2>
+        {% if error1 %}
+        <div>{{error1}}</div>
+        {% endif %}
 		<table class=table11_7>
             <th>Ticket ID</th>
 			<th>Airline</th>
@@ -166,6 +169,7 @@
 			<th>To</th>
 			<th>Status</th>
 			<th>Airplane</th>
+            <th>Price</th>
             <th>Cancel Flight</th>
 		
             {% for line in post1 %}
@@ -182,6 +186,7 @@
 				<td><input type="hidden" name="arr_airport" value="{{line['arr_airport']}}">{{line['arr_airport']}}</td>
 				<td><input type="hidden" name="flight_status" value="{{line['flight_status']}}">{{line['flight_status']}}</td>
 				<td><input type="hidden" name="id_num" value="{{line['id_num']}}">{{line['id_num']}}</td>
+                <td><input type="hidden" name="sold_price" value="{{line['sold_price']}}">{{line['sold_price']}}</td>
                 <td><input id="post_button" type="submit" value="Cancel" /></td>				
 
 			</tr>
