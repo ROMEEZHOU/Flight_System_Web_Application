@@ -726,8 +726,8 @@ def staff_view_flight():
     end_date=request.form['end_date']
 
     cursor=conn.cursor()
-    query1='(SELECT * FROM flight WHERE dept_airport= %s AND arr_airport= %s AND (dept_date BETWEEN %s AND %s)) UNION (SELECT * FROM flight WHERE dept_airport= %s AND (dept_date BETWEEN %s AND %s) AND arr_airport IN (SELECT name FROM airport WHERE city= %s)) UNION (SELECT * FROM flight WHERE arr_airport= %s AND (dept_date BETWEEN %s AND %s) AND dept_airport IN (SELECT name FROM airport WHERE city= %s)) UNION (SELECT * FROM flight WHERE (dept_date BETWEEN %s AND %s) AND dept_airport IN (SELECT name FROM airport WHERE city= %s) AND arr_airport IN (SELECT name FROM airport WHERE city = %s))'
-    cursor.execute(query1,(departure,destination,start_date,end_date,departure,start_date,end_date,destination,destination,start_date,end_date,departure,start_date,end_date,departure,destination))
+    query1='(SELECT * FROM flight WHERE airline_name=%s AND dept_airport= %s AND arr_airport= %s AND (dept_date BETWEEN %s AND %s)) UNION (SELECT * FROM flight WHERE airline_name=%s AND dept_airport= %s AND (dept_date BETWEEN %s AND %s) AND arr_airport IN (SELECT name FROM airport WHERE city= %s)) UNION (SELECT * FROM flight WHERE airline_name=%s AND arr_airport= %s AND (dept_date BETWEEN %s AND %s) AND dept_airport IN (SELECT name FROM airport WHERE city= %s)) UNION (SELECT * FROM flight WHERE airline_name=%s AND (dept_date BETWEEN %s AND %s) AND dept_airport IN (SELECT name FROM airport WHERE city= %s) AND arr_airport IN (SELECT name FROM airport WHERE city = %s))'
+    cursor.execute(query1,(airline_name,departure,destination,start_date,end_date, airline_name,departure,start_date,end_date,destination, airline_name,destination,start_date,end_date,departure, airline_name,start_date,end_date,departure,destination))
 
     data=cursor.fetchall()
     cursor.close()
@@ -966,9 +966,73 @@ def add_airport_form():
     return render_template('add_airport_success.html')
 
 
-@app.route('/flight_rating',methods=['GET','POST'])
+@app.route('/flight_ratings',methods=['GET','POST'])
 def flight_rating():
-    pass
+    if session.get('type')!='staff' or not session.get('username'):
+        return redirect('/')
+    airline=session['airline']
+    username = session['username']
+    today_date=datetime.today().date()
+    start_date=today_date-timedelta(30)
+    today_date_str=today_date.strftime("%y-%m-%d")
+    start_date_str=start_date.strftime("%y-%m-%d")
+
+    cursor=conn.cursor()
+    query='SELECT * FROM flight WHERE airline_name= %s AND (dept_date BETWEEN %s AND %s)' 
+    cursor.execute(query,(airline,start_date_str,today_date_str))
+    data=cursor.fetchall()
+    cursor.close()
+    
+    return render_template('flight_rating_home.html',airline=airline, username=username, post1=data)
+
+@app.route('/search_rate_comment',methods=['GET','POST'])
+def search_rate_comment():
+    if session.get('type')!='staff' or not session.get('username'):
+        return redirect('/')
+
+    airline_name=session['airline']
+    username=session['username']
+    departure=request.form['departure']
+    destination=request.form['destination']
+    start_date=request.form['start_date']
+    end_date=request.form['end_date']
+
+    cursor=conn.cursor()
+    query1='(SELECT * FROM flight WHERE airline_name=%s AND dept_airport= %s AND arr_airport= %s AND (dept_date BETWEEN %s AND %s)) UNION (SELECT * FROM flight WHERE airline_name=%s AND dept_airport= %s AND (dept_date BETWEEN %s AND %s) AND arr_airport IN (SELECT name FROM airport WHERE city= %s)) UNION (SELECT * FROM flight WHERE airline_name=%s AND arr_airport= %s AND (dept_date BETWEEN %s AND %s) AND dept_airport IN (SELECT name FROM airport WHERE city= %s)) UNION (SELECT * FROM flight WHERE airline_name=%s AND (dept_date BETWEEN %s AND %s) AND dept_airport IN (SELECT name FROM airport WHERE city= %s) AND arr_airport IN (SELECT name FROM airport WHERE city = %s))'
+    cursor.execute(query1,(airline_name,departure,destination,start_date,end_date, airline_name,departure,start_date,end_date,destination, airline_name,destination,start_date,end_date,departure, airline_name,start_date,end_date,departure,destination))
+
+    data=cursor.fetchall()
+    cursor.close()
+
+    return render_template('flight_rating_home.html',airline=airline_name,username=username,post1=data)
+
+@app.route('/view_rate_and_comment',methods=['GET','POST'])
+def view_rate_and_comment():
+    if session.get('type')!='staff' or not session.get('username'):
+        return redirect('/')
+    username=session['username']
+    airline_name=session['airline']
+    flight_num=request.form['flight_num']
+    print(flight_num)
+    dept_date=request.form['dept_date']
+    dept_time=request.form['dept_time']
+
+    cursor=conn.cursor()
+    average_query='SELECT sum(rate)/(COUNT(rate)) AS average FROM previous_flight WHERE airline_name=%s AND flight_num=%s AND dept_date=%s AND dept_time=%s GROUP BY airline_name,flight_num,dept_date,dept_time'
+    cursor.execute(average_query,(airline_name,flight_num,dept_date,dept_time))
+    data1=cursor.fetchone()
+    if data1:
+        average_rate=data1['average']
+
+        all_query='SELECT email,rate,cus_comment FROM previous_flight WHERE airline_name=%s AND flight_num=%s AND dept_date=%s AND dept_time=%s'
+        cursor.execute(all_query,(airline_name,flight_num,dept_date,dept_time))
+        data2=cursor.fetchall()
+        cursor.close()
+
+        return render_template('rating_and_comment.html',username=username,flight_num=flight_num,dept_date=dept_date,dept_time=dept_time,average=average_rate,data2=data2)
+    else:
+        return render_template('rating_and_comment.html',username=username,flight_num=flight_num,dept_date=dept_date,dept_time=dept_time)
+
 
 @app.route('/frequent_customer',methods=['GET','POST'])
 def frequent_customer():
