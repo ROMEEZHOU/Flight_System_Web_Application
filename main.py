@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, session, url_for, redirect
 import pymysql.cursors
 from datetime import datetime, date, timedelta
+from dateutil.relativedelta import relativedelta
 import random
 
 #Initialize the app from Flask
@@ -620,6 +621,70 @@ def rate_and_comment_form():
         conn.commit()
         cursor.close()
         return render_template('rate_success.html')
+
+@app.route('/customer_spending',methods=['GET','POST'])
+def customer_spending():
+    username=session['username']
+
+    today_date=datetime.today().date()
+    month_today=today_date.replace(day=1)
+    today_date_str=today_date.strftime("%y-%m-%d")
+
+    six_months = date.today() + relativedelta(months=-6)
+    month_six_month=six_months.replace(day=1)
+    six_month_str=month_six_month.strftime("%y-%m-%d")
+
+    a_year=date.today() + relativedelta(years=-1)
+    month_a_year=a_year.replace(day=1)
+    a_year_str=month_a_year.strftime("%y-%m-%d")
+
+    email=session['email']
+
+    cursor=conn.cursor()
+    year_query='SELECT SUM(sold_price) AS spending FROM purchase WHERE email=%s AND purchase_date<=%s AND purchase_date>=%s'
+    cursor.execute(year_query,(email,today_date_str,a_year_str))
+    data1=cursor.fetchone()
+    if data1:
+        total_spending=data1['spending']
+
+        month_query='SELECT YEAR(purchase_date) AS year, MONTH(purchase_date) AS month, SUM(sold_price) AS spending FROM purchase WHERE email=%s AND purchase_date<=%s AND purchase_date>=%s GROUP BY YEAR(purchase_date),MONTH(purchase_date)'
+        cursor.execute(month_query,(email,today_date_str,six_month_str))
+        data2=cursor.fetchall()
+
+        cursor.close()
+        if data2:
+            return render_template('customer_spending.html',username=username,total_spending=total_spending,data2=data2)
+        else:
+            return render_template('customer_spending.html',username=username,total_spending=total_spending)
+
+    else:
+        cursor.close()
+        return render_template('customer_spending.html',username=username)
+
+@app.route('/customer_spending_form',methods=['GET','POST'])
+def customer_spending_form():
+    username=session['username']
+    email=session['email']
+    start_date=request.form['start_date']
+    end_date=request.form['end_date']
+
+    cursor=conn.cursor()
+
+    total_query='SELECT SUM(sold_price) AS spending FROM purchase WHERE email=%s AND purchase_date>%s AND purchase_date<%s'
+    cursor.execute(total_query,(email,start_date,end_date))
+    data1=cursor.fetchone()
+    if data1:
+        total_spending=data1['spending']
+
+        month_query='SELECT YEAR(purchase_date) AS year, MONTH(purchase_date) AS month, SUM(sold_price) AS spending FROM purchase WHERE email=%s AND purchase_date<=%s AND purchase_date>=%s GROUP BY YEAR(purchase_date),MONTH(purchase_date)'
+        cursor.execute(month_query,(email,end_date,start_date))
+        data2=cursor.fetchall()
+        cursor.close()
+
+        return render_template('customer_spending.html',username=username,total_spending=total_spending,data2=data2)
+
+    else:
+        return render_template('customer_spending.html',username=username)
 
 
 

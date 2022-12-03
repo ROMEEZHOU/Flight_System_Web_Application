@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+</head>
+
+<style type="text/css">
+	.navigation {
+  		display: flex;
+  		flex-flow: row wrap;
+  		justify-content: flex-end;
+  
+  		list-style: none;
+  		margin: 0; 
+  		background: #6598d3;
+	}
+
+	.navigation a {
+  		text-decoration: none;
+  		display: block;
+  		padding: 1em;
+  		color: white;
+	}
+
+	.navigation a:hover {
+  		background: #1565C0;
+	}
+
+    .navigation2 {
+  		display: flex;
+  		flex-flow: row wrap;
+  		justify-content: flex-start;
+  
+  		list-style: none;
+  		margin: 0; 
+  		background: #6598d3;
+	}
+
+	.navigation2 a {
+  		text-decoration: none;
+  		display: block;
+  		padding: 1em;
+  		color: white;
+	}
+
+	.navigation2 a:hover {
+  		background: #1565C0;
+	}
+	
+	h1 {
+        color: #1565C0;
+        font-family: arial;
+    }
+
+	h2 {
+        color: #1565C0;
+        font-family: arial;
+    }
+
+	#post_button {
+        float: left;
+        background-color: #1565C0;
+        border: none;
+        color: white;
+        padding: 4px;
+        font-size: 14px;
+        border-radius: 2px;
+	}
+    #post_button:hover {
+        background-color: #6598d3;
+	}
+
+	.table11_7 table {
+        width:100%;
+        margin:15px 0;
+        border:0;
+    }
+    .table11_7 th {
+        background-color:#6598d3;
+        color:#FFFFFF
+    }
+    .table11_7,.table11_7 th,.table11_7 td {
+        font-size:0.95em;
+        text-align:center;
+        padding:4px;
+        border-collapse:collapse;
+    }
+    .table11_7 th,.table11_7 td {
+        border: 1px solid #6598d3;
+        border-width:1px 0 1px 0;
+        border:2px inset #ffffff;
+    }
+    .table11_7 tr {
+        border: 1px solid #b1c9e4;
+    }
+    .table11_7 tr:nth-child(odd){
+        background-color:#b1c9e4;
+    }
+    .table11_7 tr:nth-child(even){
+        background-color:#ffffff;
+    }
+
+
+
+</style>
+
+<body>
+    <div>
+        
+		<ul class="navigation">
+			<li><a href="/log_out">Log Out </a></li>
+		</ul>
+	</div>
+
+    <form action="/post" method="POST">
+        <h1>Welcome {{username}} !</h1>
+        <h1>Welcome to Romee's Flight Booking System！</h1>
+    </form>
+
+    <div style="min-height: 70px; flex: 1;">
+		<form action="/customer_spending_form" method="POST">
+			<div style="display: table;">
+				<div style="display: table-cell;">
+					Start Date: <input type="date" name = "start_date" required/> </br>
+				</div>
+				&nbsp;
+				&nbsp;
+				<div style="display: table-cell;">
+					End Date: <input type="date" name = "end_date" required/> </br>
+				</div>
+			</div>
+			<input id="post_button" type="submit" value="View My Spending" />
+			{% if error1 %}
+            	<p class="error"><strong>Error:</strong> {{error1}}</p>
+        	{% endif %}			
+		</form>
+	</div>
+
+    {% if not total_spending %}
+    <h2>There is no spending record in the corresponding time slot (Defaut: last year)</h2>
+    {% endif %}
+
+    {% if total_spending %}
+    <h2> Your total spending (Default: in the last year): {{total_spending}} </h2>
+    {% endif %}
+
+    {% if not data2 %}
+    <h2>There is no monthly spending record (Default: last 6 months)</h2>
+    {% endif%}
+
+	{% if data2 %}
+	<div>
+		<h2>Your monthly spending (Default: last 6 months)</h2>
+		<table class=table11_7>
+			<th>Year</th>
+			<th>Month</th>
+			<th>Spending</th>
+		
+		{% for line in data2 %}
+			<tr>
+				<td>{{line['year']}}</td>
+				<td>{{line['month']}}</td>
+				<td>{{line['spending']}}</td>
+			</tr>
+		{% endfor %}
+		</table>
+	</div>
+	{% endif %}
+
+    </br>
+    </br>
+    
+    <div class="navigation2">
+        <a href="/customer_home_init">Go back</a>
+    </div>
+</body>
+
+</html>
