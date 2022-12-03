@@ -3,6 +3,10 @@ import pymysql.cursors
 from datetime import datetime, date, timedelta
 from dateutil.relativedelta import relativedelta
 import random
+import matplotlib
+import matplotlib.pyplot as plt
+
+matplotlib.use('SVG')
 
 #Initialize the app from Flask
 app=Flask(__name__,template_folder='template')
@@ -679,13 +683,27 @@ def customer_spending_form():
         month_query='SELECT YEAR(purchase_date) AS year, MONTH(purchase_date) AS month, SUM(sold_price) AS spending FROM purchase WHERE email=%s AND purchase_date<=%s AND purchase_date>=%s GROUP BY YEAR(purchase_date),MONTH(purchase_date)'
         cursor.execute(month_query,(email,end_date,start_date))
         data2=cursor.fetchall()
+        
+        lists=[[],[]]
+        for row in data2:
+            lists[0].append(str(row['year'])+str(row['month']))
+            lists[1].append(float(row['spending']))
+
+        x=lists[0]
+        y=lists[1]
+        
+        plt.bar(x,y,width=0.5,bottom=0,align='edge',color='#1565C0',edgecolor ='#6598d3',linewidth=2)
+        plt.title("spending by month",size=26)
+        plt.xlabel('month',size=18)
+        plt.ylabel('spending',size=18)
+
+        plt.savefig('template/customer_spending.png')
         cursor.close()
 
         return render_template('customer_spending.html',username=username,total_spending=total_spending,data2=data2)
 
     else:
         return render_template('customer_spending.html',username=username)
-
 
 
 
