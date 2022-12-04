@@ -1054,11 +1054,106 @@ def view_rate_and_comment():
 
 @app.route('/frequent_customer',methods=['GET','POST'])
 def frequent_customer():
-    pass
+    username=session['username']
+    airline_name=session['airline']
+    today_date=datetime.today().date()
+    today_date_str=today_date.strftime("%y-%m-%d")
+
+    a_year=date.today() + relativedelta(years=-1)
+    a_year_str=a_year.strftime("%y-%m-%d")
+
+    cursor=conn.cursor()
+    query='SELECT email,COUNT(ticket_id) AS num FROM purchase NATURAL JOIN ticket WHERE airline_name=%s AND purchase_date>%s AND purchase_date<=%s GROUP BY email ORDER BY num DESC'
+    cursor.execute(query,(airline_name,a_year_str,today_date_str))
+    most_fre=cursor.fetchone()
+    email=most_fre['email']
+    num=most_fre['num']
+    cursor.close()
+
+    return render_template('frequent_customer.html',username=username,email=email,num=num)
+
+@app.route('/search_customer_flight',methods=['GET','POST'])
+def search_customer_flight():
+    airline_name=session['airline']
+    username=session['username']
+    email=request.form['email']
+
+    cursor=conn.cursor()
+    query='SELECT airline_name,flight_num,dept_date,dept_time,arr_date,arr_time,dept_airport,arr_airport,base_price,sold_price,flight_status,id_num FROM ticket NATURAL JOIN purchase NATURAL JOIN flight WHERE email=%s AND airline_name=%s'
+    cursor.execute(query,(email,airline_name))
+    data=cursor.fetchall()
+    cursor.close()
+
+    return render_template('frequent_customer.html',username=username,post1=data)
+
+
+
 
 @app.route('/view_report',methods=['GET','POST'])
 def view_report():
-    pass
+    username=session['username']
+    airline_name=session['airline']
+
+    today_date=datetime.today().date()
+    today_date_str=today_date.strftime("%y-%m-%d")
+
+    one_months = date.today() + relativedelta(months=-1)
+    one_month_str=one_months.strftime("%y-%m-%d")
+
+    a_year=date.today() + relativedelta(years=-1)
+    a_year_str=a_year.strftime("%y-%m-%d")
+
+    cursor=conn.cursor()
+    query_month='SELECT COUNT(ticket_id) AS month_sold FROM purchase NATURAL JOIN ticket WHERE purchase_date>%s AND purchase_date<=%s AND airline_name=%s'
+    cursor.execute(query_month,(one_month_str,today_date_str,airline_name))
+    data1=cursor.fetchone()
+
+    query_year='SELECT COUNT(ticket_id) AS year_sold FROM purchase NATURAL JOIN ticket WHERE purchase_date>%s AND purchase_date<=%s AND airline_name=%s'
+    cursor.execute(query_year,(a_year_str,today_date_str,airline_name))
+    data2=cursor.fetchone()
+    if data2:
+        year_report=data2['year_sold']
+
+        query_all='SELECT YEAR(purchase_date) AS year, MONTH(purchase_date) AS month, COUNT(ticket_id) AS monthly FROM purchase NATURAL JOIN ticket WHERE purchase_date>%s AND purchase_date<=%s AND airline_name=%s GROUP BY YEAR(purchase_date),MONTH(purchase_date)'
+        cursor.execute(query_all,(a_year_str,today_date_str,airline_name))
+        data3=cursor.fetchall()
+
+        cursor.close()
+        if data1:
+            month_report=data1['month_sold']
+            return render_template('reports.html',username=username,month_report=month_report,year_report=year_report,data2=data3)
+        else:
+            return render_template('reports.html',username=username,year_report=year_report,data2=data3)
+
+    else:
+        return render_template('reports.html',username=username)
+
+@app.route('/search_report',methods=['GET','POST'])
+def search_report():
+    airline_name=session['airline']
+    username=session['username']
+    start_date=request.form['start_date']
+    end_date=request.form['end_date']
+
+    cursor=conn.cursor()
+    query_total='SELECT COUNT(ticket_id) AS year_sold FROM purchase NATURAL JOIN ticket WHERE purchase_date>%s AND purchase_date<=%s AND airline_name=%s'
+    cursor.execute(query_total,(start_date,end_date,airline_name))
+    data1=cursor.fetchone()
+    if data1:
+        year_report=data1['year_sold']
+
+        query_all='SELECT YEAR(purchase_date) AS year, MONTH(purchase_date) AS month, COUNT(ticket_id) AS monthly FROM purchase NATURAL JOIN ticket WHERE purchase_date>%s AND purchase_date<=%s AND airline_name=%s GROUP BY YEAR(purchase_date),MONTH(purchase_date)'
+        cursor.execute(query_all,(start_date,end_date,airline_name))
+        data2=cursor.fetchall()
+
+        cursor.close()
+        return render_template('reports.html',username=username,year_report=year_report,data2=data2)
+
+    else:
+        cursor.close()
+        return render_template('reports.html',username=username)
+
+
 
 @app.route('/view_revenue',methods=['GET','POST'])
 def view_revenue():
