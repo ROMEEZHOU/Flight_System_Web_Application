@@ -1157,7 +1157,55 @@ def search_report():
 
 @app.route('/view_revenue',methods=['GET','POST'])
 def view_revenue():
-    pass
+    username=session['username']
+    airline_name=session['airline']
+
+    today_date=datetime.today().date()
+    today_date_str=today_date.strftime("%y-%m-%d")
+
+    one_months = date.today() + relativedelta(months=-1)
+    one_month_str=one_months.strftime("%y-%m-%d")
+
+    a_year=date.today() + relativedelta(years=-1)
+    a_year_str=a_year.strftime("%y-%m-%d")
+
+    cursor=conn.cursor()
+    view_query1='CREATE OR REPLACE VIEW revenue1 AS (SELECT SUM(sold_price) AS sold, base_price*COUNT(ticket_id) AS base FROM purchase NATURAL JOIN ticket NATURAL JOIN flight WHERE airline_name=%s AND purchase_date<=%s AND purchase_date>%s GROUP BY airline_name,flight_num, dept_date,dept_time)'
+    cursor.execute(view_query1,(airline_name,today_date_str,one_month_str))
+    conn.commit()
+
+    view_query2='CREATE OR REPLACE VIEW revenue2 AS (SELECT SUM(sold_price) AS sold, base_price*COUNT(ticket_id) AS base FROM purchase NATURAL JOIN ticket NATURAL JOIN flight WHERE airline_name=%s AND purchase_date<=%s AND purchase_date>%s GROUP BY airline_name,flight_num, dept_date,dept_time )'
+    cursor.execute(view_query2,(airline_name,today_date_str,a_year_str))
+    conn.commit()
+
+    
+
+    re_query2='SELECT SUM(sold-base) AS year FROM revenue2'
+    cursor.execute(re_query2)
+    data2=cursor.fetchone()
+    if data2:
+        year_rev=data2['year']
+        print(year_rev)
+
+        re_query1='SELECT SUM(sold-base) AS month FROM revenue1'
+        cursor.execute(re_query1)
+        data1=cursor.fetchone()
+        if data1:
+            month_rev=data1['month']
+            print(month_rev)
+            cursor.close()
+
+            return render_template('view_revenue.html',username=username,month_rev=month_rev,year_rev=year_rev)
+        
+        else:
+            cursor.close()
+
+            return render_template('view_revenue.html',username=username,year_rev=year_rev)
+    else:
+        cursor.close()
+
+        return render_template('view_revenue.html',username=username)
+
 
 
 
