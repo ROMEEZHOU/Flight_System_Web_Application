@@ -214,7 +214,12 @@
 				    <td><input type="hidden" name="sold_price" value="{{line['sold_price']}}">{{line['sold_price']}}</td>
 				    <td><input type="hidden" name="flight_status" value="{{line['flight_status']}}">{{line['flight_status']}}</td>
 				    <td><input type="hidden" name="id_num" value="{{line['id_num']}}">{{line['id_num']}}</td>
-                    <td><input id="post_button" type="submit" value="Book" /></td>
+					{% if line['available']=="available" %}
+                    	<td><input id="post_button" type="submit" value="Book" /></td>
+					{% endif %}
+					{% if line['available']=="unavailable" %}
+                    	<td>No Seat</td>
+					{% endif %}
 			    </tr>
             </form>
 		{% endfor %}
@@ -253,7 +258,12 @@
 				    <td><input type="hidden" name="sold_price" value="{{line['sold_price']}}">{{line['sold_price']}}</td>
 				    <td><input type="hidden" name="flight_status" value="{{line['flight_status']}}">{{line['flight_status']}}</td>
 				    <td><input type="hidden" name="id_num" value="{{line['id_num']}}">{{line['id_num']}}</td>
-                    <td><input id="post_button" type="submit" value="Book" /></td>
+                    {% if line['available']=="available" %}
+                    	<td><input id="post_button" type="submit" value="Book" /></td>
+					{% endif %}
+					{% if line['available']=="available" %}
+                    	<td>No Seat</td>
+					{% endif %}
 			    </tr>
             </form>
 		{% endfor %}

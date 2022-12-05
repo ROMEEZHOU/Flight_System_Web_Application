@@ -407,8 +407,8 @@ def customer_search_flight():
             cursor.execute(view_query3, (departure, destination, dept_date, departure, dept_date, destination, destination, dept_date, departure, dept_date, departure, destination))
             conn.commit()
 
-            query_dept='(SELECT airline_name,flight_num,dept_date,dept_time,arr_date,arr_time, dept_airport, arr_airport, IF(cus_num>seat_num*0.6,base_price*1.25, base_price) AS sold_price, flight_status,id_num FROM cus_count NATURAL JOIN temp_flight1 NATURAL JOIN airplane WHERE cus_num<seat_num) UNION\
-                (SELECT airline_name,flight_num,dept_date,dept_time,arr_date,arr_time, dept_airport, arr_airport, base_price AS sold_price, flight_status,id_num FROM temp_flight1 WHERE NOT EXISTS (SELECT * FROM cus_count AS C WHERE C.airline_name=temp_flight1.airline_name AND C.flight_num=temp_flight1.flight_num AND C.dept_date=temp_flight1.dept_date AND C.dept_time=temp_flight1.dept_time))'
+            query_dept='(SELECT airline_name,flight_num,dept_date,dept_time,arr_date,arr_time, dept_airport, arr_airport, IF(cus_num>seat_num*0.6,base_price*1.25, base_price) AS sold_price, flight_status,id_num , IF(cus_num<seat_num,"available", "unavailable") AS available FROM cus_count NATURAL JOIN temp_flight1 NATURAL JOIN airplane) UNION\
+                (SELECT airline_name,flight_num,dept_date,dept_time,arr_date,arr_time, dept_airport, arr_airport, base_price AS sold_price, flight_status,id_num, "available" AS available FROM temp_flight1 WHERE NOT EXISTS (SELECT * FROM cus_count AS C WHERE C.airline_name=temp_flight1.airline_name AND C.flight_num=temp_flight1.flight_num AND C.dept_date=temp_flight1.dept_date AND C.dept_time=temp_flight1.dept_time))'
 
             cursor.execute(query_dept)
             data1=cursor.fetchall()
@@ -421,8 +421,8 @@ def customer_search_flight():
             cursor.execute(view_query4, (destination, departure, return_date, destination, return_date, departure, departure, return_date, destination, return_date, destination, departure))
             conn.commit()
 
-            query_re='(SELECT airline_name,flight_num,dept_date,dept_time,arr_date,arr_time, dept_airport, arr_airport, IF(cus_num>seat_num*0.6,base_price*1.25, base_price) AS sold_price, flight_status,id_num FROM cus_count NATURAL JOIN temp_flight2 NATURAL JOIN airplane WHERE cus_num<seat_num) UNION\
-                (SELECT airline_name,flight_num,dept_date,dept_time,arr_date,arr_time, dept_airport, arr_airport, base_price AS sold_price, flight_status,id_num FROM temp_flight2 WHERE NOT EXISTS (SELECT * FROM cus_count AS C WHERE C.airline_name=temp_flight2.airline_name AND C.flight_num=temp_flight2.flight_num AND C.dept_date=temp_flight2.dept_date AND C.dept_time=temp_flight2.dept_time))'
+            query_re='(SELECT airline_name,flight_num,dept_date,dept_time,arr_date,arr_time, dept_airport, arr_airport, IF(cus_num>seat_num*0.6,base_price*1.25, base_price) AS sold_price, flight_status,id_num, IF(cus_num<seat_num,"available", "unavailable") AS available FROM cus_count NATURAL JOIN temp_flight2 NATURAL JOIN airplane) UNION\
+                (SELECT airline_name,flight_num,dept_date,dept_time,arr_date,arr_time, dept_airport, arr_airport, base_price AS sold_price, flight_status,id_num, "available" AS available FROM temp_flight2 WHERE NOT EXISTS (SELECT * FROM cus_count AS C WHERE C.airline_name=temp_flight2.airline_name AND C.flight_num=temp_flight2.flight_num AND C.dept_date=temp_flight2.dept_date AND C.dept_time=temp_flight2.dept_time))'
 
             cursor.execute(query_re)
 
@@ -447,8 +447,8 @@ def customer_search_flight():
         cursor.execute(view_query2, (departure, destination, dept_date, departure, dept_date, destination, destination, dept_date, departure, dept_date, departure, destination))
         conn.commit()
 
-        query='(SELECT airline_name,flight_num,dept_date,dept_time,arr_date,arr_time, dept_airport, arr_airport, IF(cus_num>seat_num*0.6,base_price*1.25, base_price) AS sold_price, flight_status,id_num FROM cus_count NATURAL JOIN temp_flight NATURAL JOIN airplane WHERE cus_num<seat_num) UNION\
-            (SELECT airline_name,flight_num,dept_date,dept_time,arr_date,arr_time, dept_airport, arr_airport, base_price AS sold_price, flight_status,id_num FROM temp_flight WHERE NOT EXISTS (SELECT * FROM cus_count AS C WHERE C.airline_name=temp_flight.airline_name AND C.flight_num=temp_flight.flight_num AND C.dept_date=temp_flight.dept_date AND C.dept_time=temp_flight.dept_time))'
+        query='(SELECT airline_name,flight_num,dept_date,dept_time,arr_date,arr_time, dept_airport, arr_airport, IF(cus_num>seat_num*0.6,base_price*1.25, base_price) AS sold_price, flight_status,id_num, IF(cus_num<seat_num,"available", "unavailable") AS available FROM cus_count NATURAL JOIN temp_flight NATURAL JOIN airplane) UNION\
+            (SELECT airline_name,flight_num,dept_date,dept_time,arr_date,arr_time, dept_airport, arr_airport, base_price AS sold_price, flight_status,id_num, "available" AS available FROM temp_flight WHERE NOT EXISTS (SELECT * FROM cus_count AS C WHERE C.airline_name=temp_flight.airline_name AND C.flight_num=temp_flight.flight_num AND C.dept_date=temp_flight.dept_date AND C.dept_time=temp_flight.dept_time))'
         cursor.execute(query)
         data=cursor.fetchall()
         cursor.close()
