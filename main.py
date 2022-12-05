@@ -326,10 +326,16 @@ def customer_home_init():
         return redirect('/')
     username=session['username']
     email = session['email']
+    
+    today_date=datetime.today().date()
+    today_date_str=today_date.strftime("%y-%m-%d")
+
+    today_after = date.today() + relativedelta(days=+1)
+    today_after_str=today_after.strftime("%y-%m-%d")
     print(email)
     cursor=conn.cursor()
-    query='SELECT ticket_id, airline_name, flight_num, dept_date, dept_time, arr_date, arr_time, dept_airport, arr_airport, flight_status, id_num, sold_price FROM ticket NATURAL JOIN purchase NATURAL JOIN flight WHERE email=%s AND ((dept_date=CURDATE() AND dept_time>=CURRENT_TIME()) OR dept_date>CURDATE())'
-    cursor.execute(query,(email))
+    query='SELECT ticket_id, airline_name, flight_num, dept_date, dept_time, arr_date, arr_time, dept_airport, arr_airport, flight_status, id_num, sold_price, IF(dept_date<%s,"unavailable", "available") AS available FROM ticket NATURAL JOIN purchase NATURAL JOIN flight WHERE email=%s AND ((dept_date=CURDATE() AND dept_time>=CURRENT_TIME()) OR dept_date>CURDATE())'
+    cursor.execute(query,(today_after_str,email))
     data=cursor.fetchall()
     cursor.close()
     return render_template('customer_home_init.html',username=username,post1=data)
